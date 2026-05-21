@@ -8,9 +8,7 @@ require_once APP_PATH . '/core/Model.php';
  */
 class SystemRecordModel extends Model {
 
-    // =========================================================================
     // TICKETS
-    // =========================================================================
 
     public function createTicket(array $data): int {
         return $this->execute(
@@ -90,9 +88,7 @@ class SystemRecordModel extends Model {
         return $row !== null;
     }
 
-    // =========================================================================
     // AUDIT LOG
-    // =========================================================================
 
     public function writeAudit(array $data): void {
         $this->execute(
@@ -129,36 +125,5 @@ class SystemRecordModel extends Model {
 
     public function countAuditLog(): int {
         return $this->count('system_records', "record_type = 'AUDIT'");
-    }
-
-    // =========================================================================
-    // AI REPORTS
-    // =========================================================================
-
-    public function saveAiReport(array $data): int {
-        return $this->execute(
-            "INSERT INTO system_records
-                (record_type, actor_user_id, title, input_snapshot_json, output_json,
-                 model_name, created_at, updated_at)
-             VALUES ('AI_REPORT', ?, ?, ?, ?, ?, NOW(), NOW())",
-            [
-                $data['actor_user_id'],
-                $data['title'],
-                json_encode($data['input']),
-                json_encode($data['output']),
-                $data['model_name'] ?? 'gemini-2.0-flash',
-            ]
-        );
-    }
-
-    public function getLatestAiReports(string $title, int $limit = 5): array {
-        return $this->query(
-            "SELECT * FROM system_records
-             WHERE record_type = 'AI_REPORT'
-               AND title = ?
-             ORDER BY created_at DESC
-             LIMIT ?",
-            [$title, $limit]
-        );
     }
 }

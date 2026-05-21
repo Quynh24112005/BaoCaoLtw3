@@ -185,7 +185,7 @@ if ($total == 0) {
                                     <i data-lucide="<?= $emp['status'] === 'ACTIVE' ? 'lock' : 'unlock' ?>" style="width:15px;height:15px"></i>
                                 </button>
 
-                                <form method="POST" action="<?= BASE_URL ?>/employees/delete" style="display:inline" onsubmit="return confirm('Bạn có chắc chắn muốn xóa nhân viên này khỏi hệ thống? Hành động này không thể hoàn tác!')">
+                                <form method="POST" action="<?= BASE_URL ?>/employees/delete" class="delete-employee-form" style="display:inline">
                                     <input type="hidden" name="id" value="<?= $emp['id'] ?>">
                                     <button type="submit" class="action-icon-btn delete" title="Xóa nhân viên">
                                         <i data-lucide="trash-2" style="width:15px;height:15px"></i>
@@ -308,6 +308,12 @@ $(function() {
                             data-id="${emp.id}" data-status="${emp.status}" title="${lockTitle}">
                             <i data-lucide="${lockIcon}" style="width:15px;height:15px"></i>
                         </button>
+                        <form method="POST" action="${BASE}/employees/delete" class="delete-employee-form" style="display:inline">
+                            <input type="hidden" name="id" value="${emp.id}">
+                            <button type="submit" class="action-icon-btn delete" title="Xóa nhân viên">
+                                <i data-lucide="trash-2" style="width:15px;height:15px"></i>
+                            </button>
+                        </form>
                     </div>
                 </td>
             </tr>`;
@@ -356,6 +362,36 @@ $(function() {
             }
         });
     });
+    // =========================================================
+    // 3. XỬ LÝ MODAL XÁC NHẬN XÓA TỰ DỰNG (ĐẸP HƠN ALERT)
+    // =========================================================
+    let formToSubmit = null;
+
+    // Lắng nghe sự kiện submit của form xóa (dùng event delegation để nhận diện cả hàng render bằng AJAX)
+    $(document).on('submit', '.delete-employee-form', function(e) {
+        e.preventDefault();
+        formToSubmit = this;
+        $('#deleteConfirmModal').css('display', 'flex').hide().fadeIn(200);
+    });
+
+    // Bấm nút Hủy trên modal
+    $('#btnCancelDelete').on('click', function() {
+        $('#deleteConfirmModal').fadeOut(150);
+        formToSubmit = null;
+    });
+
+    // Bấm vùng tối overlay để tắt modal
+    $('.modal-overlay').on('click', function() {
+        $('#deleteConfirmModal').fadeOut(150);
+        formToSubmit = null;
+    });
+
+    // Bấm nút Xác nhận xóa trên modal
+    $('#btnConfirmDelete').on('click', function() {
+        if (formToSubmit) {
+            formToSubmit.submit();
+        }
+    });
 });
 
 function escHtml(str) {
@@ -370,3 +406,148 @@ function showToast(msg, type) {
     setTimeout(() => toast.fadeOut(400, () => toast.remove()), 3000);
 }
 </script>
+
+<!-- CSS Modal Xác nhận Xóa cao cấp -->
+<style>
+.custom-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 10000;
+    display: none;
+    align-items: center;
+    justify-content: center;
+}
+
+.modal-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(15, 23, 42, 0.45);
+    backdrop-filter: blur(4px);
+}
+
+.modal-container {
+    position: relative;
+    background: #ffffff;
+    width: 90%;
+    max-width: 420px;
+    border-radius: 16px;
+    padding: 24px;
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    z-index: 10001;
+    transform: translateY(10px);
+    animation: modalSlideUp 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.modal-header {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    margin-bottom: 16px;
+}
+
+.modal-icon-container {
+    background: #fee2e2;
+    border-radius: 50%;
+    width: 48px;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 12px;
+}
+
+.modal-alert-icon {
+    color: #ef4444;
+    width: 24px;
+    height: 24px;
+}
+
+.modal-header h3 {
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: #0f172a;
+    margin: 0;
+}
+
+.modal-body {
+    text-align: center;
+    color: #475569;
+    font-size: 0.9rem;
+    line-height: 1.5;
+    margin-bottom: 24px;
+}
+
+.modal-subtext {
+    font-size: 0.8rem;
+    color: #94a3b8;
+    margin-top: 6px;
+}
+
+.modal-footer {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+}
+
+.modal-btn {
+    padding: 10px 18px;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 0.85rem;
+    cursor: pointer;
+    border: none;
+    transition: all 0.2s ease;
+    flex: 1;
+}
+
+.modal-btn-secondary {
+    background: #f1f5f9;
+    color: #475569;
+}
+
+.modal-btn-secondary:hover {
+    background: #e2e8f0;
+    color: #0f172a;
+}
+
+.modal-btn-danger {
+    background: #ef4444;
+    color: #ffffff;
+}
+
+.modal-btn-danger:hover {
+    background: #dc2626;
+}
+
+@keyframes modalSlideUp {
+    to { transform: translateY(0); }
+}
+</style>
+
+<!-- HTML Markup Modal Xác nhận Xóa -->
+<div id="deleteConfirmModal" class="custom-modal">
+    <div class="modal-overlay"></div>
+    <div class="modal-container">
+        <div class="modal-header">
+            <div class="modal-icon-container">
+                <i data-lucide="alert-triangle" class="modal-alert-icon"></i>
+            </div>
+            <h3>Xác nhận xóa nhân viên</h3>
+        </div>
+        <div class="modal-body">
+            <p>Bạn có chắc chắn muốn xóa nhân sự này khỏi hệ thống?</p>
+            <p class="modal-subtext">Hành động này sẽ xóa mềm tài khoản và dữ liệu liên quan.</p>
+        </div>
+        <div class="modal-footer">
+            <button type="button" id="btnCancelDelete" class="modal-btn modal-btn-secondary">Hủy bỏ</button>
+            <button type="button" id="btnConfirmDelete" class="modal-btn modal-btn-danger">Xác nhận xóa</button>
+        </div>
+    </div>
+</div>
