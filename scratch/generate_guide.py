@@ -1,4 +1,19 @@
-# 📘 Tài liệu Ôn thi Chi tiết từng dòng code — HRCore HR Management System
+# -*- coding: utf-8 -*-
+import os
+
+filepath = r"d:\PTIT\NAM3\KI-2\LTW\PHP\HUONG_DAN.md"
+parts = []
+
+def add_part(text):
+    parts.append(text)
+
+def write_file():
+    with open(filepath, "w", encoding="utf-8") as f:
+        f.write("\n\n".join(parts))
+    print("Successfully wrote HUONG_DAN.md")
+
+def add_header():
+    add_part("""# 📘 Tài liệu Ôn thi Chi tiết từng dòng code — HRCore HR Management System
 
 Tài liệu này được thiết kế đặc biệt để giúp bạn học thuộc lòng, hiểu sâu bản chất code và trả lời thi vấn đáp xuất sắc. Mỗi chức năng được bóc tách chi tiết qua các bước kèm theo code thực tế và giải thích chi tiết từng dòng/khối lệnh theo phong cách dễ nhớ nhất.
 
@@ -49,9 +64,10 @@ Tài liệu này được thiết kế đặc biệt để giúp bạn học thu
 > *   **Phía Client (Trình duyệt):** Bắt các sự kiện tương tác vật lý của người dùng trên DOM (như click chuột `click`, gửi form `submit`, gõ phím `input`, thay đổi lựa chọn `change`) bằng JavaScript/jQuery.
 > *   **Phía Server (PHP):** Không nghe trực tiếp được sự kiện chuột của người dùng. PHP bắt hành động thông qua việc nhận và phân tích Request HTTP gửi lên:
 >     *   *Bắt HTTP Method:* Kiểm tra nếu phương thức nhận là POST (`$this->isPost()` / `$_SERVER['REQUEST_METHOD'] === 'POST'`) để xử lý lưu trữ.
->     *   *Bắt ngoại lệ (Exception):* Sử dụng khối lệnh `try { ... } catch (Exception $e) { ... }` để bắt các lỗi phát sinh ngoài dự kiến (như lỗi kết nối DB, lỗi trùng lặp khóa ngoại) để hiển thị thông báo lỗi thân thiện thay vì làm sập trang web.
+>     *   *Bắt ngoại lệ (Exception):* Sử dụng khối lệnh `try { ... } catch (Exception $e) { ... }` để bắt các lỗi phát sinh ngoài dự kiến (như lỗi kết nối DB, lỗi trùng lặp khóa ngoại) để hiển thị thông báo lỗi thân thiện thay vì làm sập trang web.""")
 
-## 🔍 Phần 3: Chi tiết Sự kiện & Logic của 10 Chức năng cốt lõi
+def add_login():
+    add_part("""## 🔍 Phần 3: Chi tiết Sự kiện & Logic của 10 Chức năng cốt lõi
 
 ---
 
@@ -270,9 +286,10 @@ Gọi Model cập nhật thời gian đăng nhập gần nhất (`last_login_at 
 7. Điều hướng về trang chủ
 `$this->redirect('/home');`
 Giải thích:
-Gọi phương thức chuyển hướng trình duyệt của người dùng sang trang chủ `/home`.
+Gọi phương thức chuyển hướng trình duyệt của người dùng sang trang chủ `/home`.""")
 
-### 👥 2. Thêm nhân viên mới (`/employees/store`)
+def add_create_employee():
+    add_part("""### 👥 2. Thêm nhân viên mới (`/employees/store`)
 
 #### Bước 1: Client gửi dữ liệu
 > [!IMPORTANT]
@@ -485,9 +502,10 @@ Lưu thông báo thành công ngắn hạn hiển thị ở giao diện tiếp t
 3. Điều hướng về trang danh sách
 `$this->redirect('/employees');`
 Giải thích:
-Chuyển hướng người dùng về trang danh sách nhân viên `/employees`.
+Chuyển hướng người dùng về trang danh sách nhân viên `/employees`.""")
 
-### 📝 3. Chỉnh sửa nhân viên (`/employees/update`)
+def add_update_employee():
+    add_part(r"""### 📝 3. Chỉnh sửa nhân viên (`/employees/update`)
 
 #### Bước 1: Client gửi dữ liệu
 > [!IMPORTANT]
@@ -727,9 +745,10 @@ Thiết lập session flash để hiển thị thông báo thành công ở tran
 3. Điều hướng về danh sách nhân viên
 `$this->redirect('/employees');`
 Giải thích:
-Chuyển hướng trình duyệt của Admin về route `/employees`.
+Chuyển hướng trình duyệt của Admin về route `/employees`.""")
 
-### 🗑️ 4. Xóa mềm nhân viên (`/employees/delete`)
+def add_delete_employee():
+    add_part(r"""### 🗑️ 4. Xóa mềm nhân viên (`/employees/delete`)
 
 #### Bước 1: Client gửi dữ liệu
 > [!IMPORTANT]
@@ -896,9 +915,10 @@ Tạo session flash thông báo xóa thành công.
 3. Điều hướng về trang danh sách
 `$this->redirect('/employees');`
 Giải thích:
-Chuyển hướng trình duyệt về route `/employees`.
+Chuyển hướng trình duyệt về route `/employees`.""")
 
-### 🔍 5. Tìm kiếm nhân viên realtime bằng AJAX (`/ajax/employees/search`)
+def add_search_employee():
+    add_part(r"""### 🔍 5. Tìm kiếm nhân viên realtime bằng AJAX (`/ajax/employees/search`)
 
 #### Bước 1: Client gửi dữ liệu (AJAX request)
 > [!IMPORTANT]
@@ -1127,9 +1147,10 @@ Ví dụ:
 Giải thích:
 Mã hóa mảng kết quả sang định dạng chuỗi JSON bằng hàm `json_encode()` rồi dùng lệnh `echo` xuất ra, kết thúc chạy mã bằng lệnh `exit` để không bị thừa ký tự trống phía sau CSDL.
 Ví dụ:
-`{"success":true,"data":[{"id":5,"full_name":"Nguyễn Văn An",...}],"total":1}`.
+`{"success":true,"data":[{"id":5,"full_name":"Nguyễn Văn An",...}],"total":1}`.""")
 
-### 🔒 6. Khóa/Mở khóa tài khoản bằng AJAX (`/ajax/employees/toggle-status`)
+def add_toggle_status():
+    add_part(r"""### 🔒 6. Khóa/Mở khóa tài khoản bằng AJAX (`/ajax/employees/toggle-status`)
 
 #### Bước 1: Client gửi dữ liệu (AJAX request)
 > [!IMPORTANT]
@@ -1320,9 +1341,10 @@ Gán chuỗi hiển thị tiếng Việt tương ứng trạng thái mới để
 3. Trả về JSON thành công
 `echo json_encode(['success' => true, 'new_status' => $newStatus, 'label' => $label]); exit;`
 Giải thích:
-Mã hóa JSON trả thông tin trạng thái mới về cho trình duyệt xử lý hiển thị trực quan và thoát chương trình.
+Mã hóa JSON trả thông tin trạng thái mới về cho trình duyệt xử lý hiển thị trực quan và thoát chương trình.""")
 
-### 📅 7. Đăng ký nghỉ phép (`/leave/store`)
+def add_create_leave():
+    add_part(r"""### 📅 7. Đăng ký nghỉ phép (`/leave/store`)
 
 #### Bước 1: Client gửi dữ liệu
 > [!IMPORTANT]
@@ -1552,9 +1574,10 @@ Tạo thông báo flash báo gửi đơn nghỉ thành công.
 2. Điều hướng về danh sách đơn xin nghỉ phép
 `$this->redirect('/leave');`
 Giải thích:
-Chuyển hướng trình duyệt về route `/leave` để xem trạng thái đơn nghỉ.
+Chuyển hướng trình duyệt về route `/leave` để xem trạng thái đơn nghỉ.""")
 
-### 🤝 8. AJAX Duyệt đơn nghỉ phép (`/leave/approve`)
+def add_approve_leave():
+    add_part(r"""### 🤝 8. AJAX Duyệt đơn nghỉ phép (`/leave/approve`)
 
 #### Bước 1: Client gửi dữ liệu
 > [!IMPORTANT]
@@ -1728,9 +1751,10 @@ Tạo session flash thông báo duyệt đơn thành công.
 3. Điều hướng về danh sách đơn xin nghỉ phép
 `$this->redirect('/leave');`
 Giải thích:
-Chuyển hướng trình duyệt của Admin về route `/leave`.
+Chuyển hướng trình duyệt của Admin về route `/leave`.""")
 
-### ⏰ 9. AJAX Sửa chấm công (`/ajax/attendance/update`)
+def add_update_attendance():
+    add_part(r"""### ⏰ 9. AJAX Sửa chấm công (`/ajax/attendance/update`)
 
 #### Bước 1: Client gửi dữ liệu (AJAX request)
 > [!IMPORTANT]
@@ -1952,9 +1976,10 @@ Lưu lại hoạt động thay đổi giờ công của Admin đối với nhân
 Giải thích:
 Mã hóa JSON trả thông tin thành công cùng thời gian vào/ra định dạng ngắn gọn `H:i` (Giờ:Phút) về cho giao diện cập nhật và thoát chương trình.
 Ví dụ:
-`{"success":true,"message":"Đã cập nhật chấm công.","check_in":"08:00","check_out":"17:00"}`.
+`{"success":true,"message":"Đã cập nhật chấm công.","check_in":"08:00","check_out":"17:00"}`.""")
 
-### 💵 10. Tính lương tự động (`/payroll/calculate`)
+def add_calculate_payroll():
+    add_part(r"""### 💵 10. Tính lương tự động (`/payroll/calculate`)
 
 #### Bước 1: Client gửi dữ liệu
 > [!IMPORTANT]
@@ -2216,9 +2241,10 @@ Tạo session flash thông báo tính lương thành công.
 3. Điều hướng về trang quản lý lương
 `$this->redirect('/payroll');`
 Giải thích:
-Chuyển hướng trình duyệt về route `/payroll` để xem bảng lương chi tiết.
+Chuyển hướng trình duyệt về route `/payroll` để xem bảng lương chi tiết.""")
 
----
+def add_footer():
+    add_part(r"""---
 
 ## 🗺️ Phần 4: Bản đồ định tuyến URL (URL Routing Map)
 
@@ -2249,4 +2275,19 @@ Chuyển hướng trình duyệt về route `/payroll` để xem bảng lương 
 | **`ajax/employees/toggle-status`** | `POST` | `EmployeeController` | `ajaxToggleStatus()` | Quản trị viên (`['ADMIN']`) | Khóa/Mở khóa tài khoản (AJAX JSON) |
 | **`ajax/attendance/update`** | `POST` | `AttendanceController` | `ajaxUpdate()` | Quản trị viên (`['ADMIN']`) | Cập nhật giờ chấm công (AJAX JSON) |
 
-Chúc các bạn ôn tập tốt và đạt kết quả cao trong kỳ thi vấn đáp Lập trình Web! 🎓
+Chúc các bạn ôn tập tốt và đạt kết quả cao trong kỳ thi vấn đáp Lập trình Web! 🎓""")
+
+if __name__ == "__main__":
+    add_header()
+    add_login()
+    add_create_employee()
+    add_update_employee()
+    add_delete_employee()
+    add_search_employee()
+    add_toggle_status()
+    add_create_leave()
+    add_approve_leave()
+    add_update_attendance()
+    add_calculate_payroll()
+    add_footer()
+    write_file()
