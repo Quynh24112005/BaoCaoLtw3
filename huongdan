@@ -1,0 +1,1480 @@
+# 📘 Hướng dẫn chi tiết toàn bộ chức năng — HRCore HR Management System
+
+> Tài liệu này mô tả **toàn bộ** chức năng thêm/sửa/xóa/xem của từng trang,
+> ghi rõ file, method, validation, truy vấn DB, và có/không dùng AJAX.
+
+---
+
+## Mục lục
+
+1. [Đăng nhập / Đăng xuất](#1-đăng-nhập--đăng-xuất)
+2. [Dashboard](#2-dashboard)
+3. [Hồ sơ cá nhân](#3-hồ-sơ-cá-nhân)
+4. [Quản lý nhân viên](#4-quản-lý-nhân-viên-admin-only)
+5. [Nghỉ phép](#5-nghỉ-phép)
+6. [Chấm công](#6-chấm-công)
+7. [Bảng lương](#7-bảng-lương)
+8. [Lịch làm việc](#8-lịch-làm-việc)
+9. [Khiếu nại](#9-khiếu-nại)
+
+---
+
+## 1. Đăng nhập / Đăng xuất
+
+### 1.1 Đăng nhập
+
+| | Chi tiết |
+|---|---|
+| **Route** | `GET/POST /auth/login` |
+| **Controller** | `app/controllers/AuthController.php` → `login()` |
+| **View** | `app/views/auth/login.php` |
+| **Layout** | `app/views/layouts/auth.php` (không có sidebar) |
+| **AJAX** | ❌ Không |
+
+**Luồng xử lý:**
+
+```
+GET  /auth/login
+  → Nếu đã đăng nhập (Auth::check()) → redirect /home
+  → Hiện form đăng nhập
+
+POST /auth/login
+  → Bước 1: Lấy dữ liệu từ $_POST
+      $email    = trim($this->post('email', ''))
+      $password = $this->post('password', '')
+
+  → Bước 2: Validate cơ bản
+      Nếu email hoặc password rỗng → $errors[] = 'Vui lòng nhập...'
+
+  → Bước 3: Tìm user theo email trong DB
+      $user = $this->userModel->findByEmail($email)
+      // UserModel::findByEmail() → SELECT * FROM users WHERE email = ? AND deleted_at IS NULL
+
+  → Bước 4: Kiểm tra mật khẩu
+      $this->userModel->verifyPassword($password, $user['password_hash'])
+      // Dùng PHP password_verify() bên trong
+
+  → Bước 5: Kiểm tra tài khoản không bị khóa
+      $user['status'] !== 'ACTIVE' → $errors[] = 'Tài khoản đã bị khóa.'
+
+  → Bước 6: Đăng nhập thành công
+      Auth::login($user)
+        → Session::set('user_id',   $user['id'])
+        → Session::set('user_role', $user['role'])
+        → Session::set('user_name', $user['full_name'])
+      $this->userModel->recordLastLogin($user['id'])
+        → UPDATE users SET last_login_at = NOW() WHERE id = ?
+      redirect('/home')
+```
+
+**Sự kiện JavaScript trên view:**
+
+```js
+// auth/login.php dòng 44 — nút mắt xem/ẩn mật khẩu
+onclick="togglePassword()"
+
+// auth/login.php dòng 60-73
+function togglePassword() {
+    const pw = document.getElementById('password');
+    pw.type = pw.type === 'password' ? 'text' : 'password';
+    lucide.createIcons();
+}
+
+// auth/login.php dòng 75-77 — đổi chữ nút tránh bấm 2 lần
+document.getElementById('loginForm').addEventListener('submit', function() {
+    document.getElementById('loginBtn').textContent = 'Đang xử lý...';
+});
+```
+
+---
+
+### 1.2 Đăng xuất
+
+| | Chi tiết |
+|---|---|
+| **Route** | `GET /auth/logout` |
+| **Controller** | `AuthController::logout()` |
+| **AJAX** | ❌ Không |
+
+```php
+// AuthController.php dòng 48-51
+public function logout(): void {
+    Auth::logout();          // Session::destroy() → session_unset() + session_destroy()
+    $this->redirect('/auth/login');
+}
+```
+
+---
+
+## 2. Dashboard (`/home`)
+
+| | Chi tiết |
+|---|---|
+| **Route** | `GET /home` |
+| **Controller** | `app/controllers/HomeController.php` → `index()` |
+| **View** | `app/views/home/index.php` |
+| **AJAX** | ❌ Không (render từ server) |
+
+**Luồng xử lý theo vai trò:**
+
+```php
+// HomeController.php dòng 14-45
+public function index(): void {
+    Auth::requireLogin();
+    $userId = Auth::id();
+    $role   = Auth::role();
+
+    if ($role === 'ADMIN') {
+        // Lấy số liệu thống kê tổng quan
+        $data['totalEmployees'] = $userModel->countAll();
+            // SELECT COUNT(*) FROM users WHERE deleted_at IS NULL AND status != 'LOCKED'
+
+        $data['pendingLeaves']  = $leaveModel->countAll('PENDING');
+            // SELECT COUNT(*) FROM leave_requests WHERE status = 'PENDING'
+
+        $data['openTickets']    = count($sysModel->getAllTickets('OPEN'));
+            // SELECT * FROM system_records WHERE record_type='TICKET' AND status='OPEN'
+
+        $data['payPeriods']     = $payModel->getAllPeriods();
+            // SELECT * FROM payroll_records WHERE record_type='PERIOD' ORDER BY created_at DESC
+
+        $data['deptStats']      = $userModel->getStaffCountByDepartment();
+            // SELECT department, COUNT(*) FROM users GROUP BY department
+
+    } else {
+        // EMPLOYEE: chỉ xem dữ liệu của mình
+        $weekStart = date('Y-m-d', strtotime('monday this week'));
+        $weekEnd   = date('Y-m-d', strtotime('sunday this week'));
+
+        $data['myShifts']   = $workModel->getAssignmentsByEmployee($userId, $weekStart);
+        $data['myLeaves']   = $leaveModel->findByEmployee($userId, 1, 5);
+        $data['myPayslips'] = $payModel->getPublishedItemsByEmployee($userId);
+        $data['myTickets']  = $sysModel->getTicketsByEmployee($userId);
+    }
+
+    $data['pageCSS'] = 'pages/home.css';
+    $this->render('home/index', $data);
+}
+```
+
+Dashboard **chỉ hiển thị** dữ liệu, không có thêm/sửa/xóa trực tiếp.
+
+---
+
+## 3. Hồ sơ cá nhân (`/profile`)
+
+### 3.1 Xem hồ sơ
+
+| | Chi tiết |
+|---|---|
+| **Route** | `GET /profile` |
+| **Controller** | `ProfileController::index()` |
+| **View** | `app/views/profile/index.php` |
+| **AJAX** | ❌ Không |
+
+```php
+// ProfileController.php dòng 19-21
+public function index(): void {
+    $user = $this->userModel->findById(Auth::id());
+    // SELECT * FROM users WHERE id = ? AND deleted_at IS NULL
+    $this->render('profile/index', ['user' => $user, ...]);
+}
+```
+
+---
+
+### 3.2 Chỉnh sửa hồ sơ
+
+| | Chi tiết |
+|---|---|
+| **Route** | `GET /profile/edit` → hiện form, `POST /profile/edit` → xử lý |
+| **Controller** | `ProfileController::edit()` dòng 24-79 |
+| **View** | `app/views/profile/edit.php` |
+| **AJAX** | ❌ Không |
+
+```
+GET /profile/edit
+  → Lấy $user = $this->userModel->findById(Auth::id())
+  → Hiện form điền sẵn dữ liệu
+
+POST /profile/edit
+  → Bước 1: Lấy dữ liệu từ $_POST
+      Chỉ lấy các trường được phép:
+      $updatable = ['full_name', 'phone', 'date_of_birth', 'gender']
+      $data = array_intersect_key($_POST, array_flip($updatable))
+      → Ngăn người dùng sửa email, role, status...
+
+  → Bước 2: Validate
+      Nếu full_name rỗng → $errors[] = 'Họ tên không được để trống.'
+
+  → Bước 3: Kiểm tra đổi mật khẩu (tùy chọn)
+      $currentPwd = $this->post('current_password', '')
+      $newPwd     = $this->post('new_password', '')
+      $confirmPwd = $this->post('confirm_password', '')
+
+      Nếu $changePwd = !empty($currentPwd) || !empty($newPwd):
+        - Kiểm tra mật khẩu cũ đúng không (password_verify)
+            → 'Mật khẩu hiện tại không đúng.'
+        - Kiểm tra mật khẩu mới >= 8 ký tự
+            → 'Mật khẩu mới ít nhất 8 ký tự.'
+        - Kiểm tra xác nhận khớp
+            → 'Xác nhận mật khẩu không khớp.'
+
+  → Bước 4: Nếu có lỗi → render lại form với $errors
+  → Bước 5: Lưu vào DB
+      $this->userModel->update(Auth::id(), $data)
+        → UPDATE users SET full_name=?, phone=?, date_of_birth=?, gender=? WHERE id=?
+
+      Nếu đổi mật khẩu:
+      $this->userModel->updatePassword(Auth::id(), $newPwd)
+        → UPDATE users SET password_hash = password_hash($newPwd, PASSWORD_DEFAULT) WHERE id=?
+
+  → Bước 6: Ghi audit log, redirect
+      Session::flash('success', 'Cập nhật hồ sơ thành công.')
+      redirect('/profile')
+```
+
+---
+
+## 4. Quản lý nhân viên (`/employees`) — Admin only
+
+### 4.1 Danh sách + Lọc / Tìm kiếm
+
+| | Chi tiết |
+|---|---|
+| **Route** | `GET /employees` |
+| **Controller** | `EmployeeController::index()` dòng 19-47 |
+| **View** | `app/views/employees/index.php` |
+| **CSS** | `public/css/pages/employees.css` |
+
+```php
+// Lấy tham số lọc từ URL query string
+$filters = [
+    'q'          => trim($this->get('q', '')),          // từ khóa tìm kiếm
+    'department' => trim($this->get('department', '')),  // phòng ban
+    'role'       => trim($this->get('role', '')),        // vai trò
+    'status'     => trim($this->get('status', '')),      // trạng thái
+];
+$page    = max(1, (int)$this->get('page', 1));
+$perPage = 20;
+
+$employees   = $this->userModel->findFiltered($filters, $page, $perPage);
+    // SELECT * FROM users WHERE ... LIKE ? ... LIMIT 20 OFFSET ?
+$total       = $this->userModel->countFiltered($filters);
+$departments = $this->userModel->getDepartments();
+    // SELECT DISTINCT department FROM users WHERE deleted_at IS NULL
+$stats       = $this->userModel->getDashboardStats();
+```
+
+> **🔴 Tìm kiếm realtime dùng AJAX** — xem mục 4.6
+
+---
+
+### 4.2 Thêm nhân viên mới (CREATE)
+
+| | Chi tiết |
+|---|---|
+| **Route** | `GET /employees/create` → form, `POST /employees/store` → lưu |
+| **Controller** | `EmployeeController::create()` dòng 49, `store()` dòng 53-81 |
+| **View** | `app/views/employees/create.php` |
+| **AJAX** | ❌ Không |
+
+```
+GET /employees/create
+  → render('employees/create', ['errors' => [], 'old' => []])
+  → Hiện form với các trường: họ tên, email, mật khẩu, SĐT, ngày sinh,
+    giới tính, phòng ban, chức vụ, vai trò, loại hợp đồng, lương cơ bản, lương giờ, ngày vào
+
+POST /employees/store
+  → Bước 1: Validate — hàm validateEmployee($data) dòng 247-256
+      - full_name rỗng    → 'Họ tên không được để trống.'
+      - email rỗng        → 'Email không được để trống.'
+      - email không hợp lệ → 'Email không hợp lệ.'  (filter_var FILTER_VALIDATE_EMAIL)
+      - mật khẩu < 8 ký tự → 'Mật khẩu ít nhất 8 ký tự.'
+
+  → Bước 2: Kiểm tra email trùng
+      $this->userModel->findByEmail($data['email'])
+      → 'Email này đã được sử dụng.'
+
+  → Bước 3: Nếu lỗi → render lại form với $errors và $old (giữ lại giá trị đã nhập)
+
+  → Bước 4: Tạo mã nhân viên tự động
+      $data['employee_code'] = $this->userModel->generateEmployeeCode()
+      // SELECT MAX(employee_code) FROM users → tăng lên 1 → format NV001, NV002...
+
+  → Bước 5: Lưu vào DB
+      $newId = $this->userModel->create($data)
+      // INSERT INTO users (full_name, email, password_hash, phone, department,
+      //   position, role, employment_type, base_salary, hourly_rate,
+      //   start_date, employee_code, status)
+      // VALUES (...)
+      // password_hash = password_hash($data['password'], PASSWORD_DEFAULT)
+      // status mặc định = 'ACTIVE'
+
+  → Bước 6: Ghi audit log
+      $this->sysModel->writeAudit(['action' => 'CREATE_EMPLOYEE', ...])
+
+  → Bước 7: Flash + redirect
+      Session::flash('success', 'Tạo nhân viên thành công.')
+      redirect('/employees')
+```
+
+---
+
+### 4.3 Sửa nhân viên (UPDATE)
+
+| | Chi tiết |
+|---|---|
+| **Route** | `GET /employees/edit?id=X` → form, `POST /employees/update` → lưu |
+| **Controller** | `EmployeeController::edit()` dòng 83, `update()` dòng 91-122 |
+| **View** | `app/views/employees/edit.php` |
+| **AJAX** | ❌ Không |
+
+```
+GET /employees/edit?id=X
+  → $id = (int)$this->get('id')
+  → $employee = $this->userModel->findById($id)
+  → Nếu không tìm thấy → abort(404)
+  → render('employees/edit', ['employee' => $employee, 'errors' => []])
+
+POST /employees/update
+  → $id       = (int)$this->post('id')
+  → $employee = $this->userModel->findById($id)
+  → Validate: full_name không rỗng
+
+  → $this->userModel->update($id, $data)
+      // UPDATE users SET
+      //   full_name=?, phone=?, date_of_birth=?, gender=?,
+      //   department=?, position=?, employment_type=?,
+      //   base_salary=?, hourly_rate=?, start_date=?
+      // WHERE id=?
+      // ⚠ Email KHÔNG thể đổi (disabled trên form)
+
+  → Ghi audit log: action='UPDATE_EMPLOYEE', old_value=$old, new_value=$data
+
+  → Session::flash('success', 'Cập nhật thành công.')
+  → redirect('/employees')
+```
+
+---
+
+### 4.4 Xóa nhân viên (SOFT DELETE)
+
+| | Chi tiết |
+|---|---|
+| **Route** | `POST /employees/delete` |
+| **Controller** | `EmployeeController::delete()` dòng 147-173 |
+| **AJAX** | ❌ Không (form POST với confirm dialog) |
+
+```html
+<!-- employees/index.php — form xóa với xác nhận trước -->
+<form method="POST" action="<?= BASE_URL ?>/employees/delete"
+      onsubmit="return confirm('Bạn có chắc chắn muốn xóa nhân viên này?')">
+    <input type="hidden" name="id" value="<?= $emp['id'] ?>">
+    <button type="submit" class="action-icon-btn delete">...</button>
+</form>
+```
+
+```php
+// EmployeeController::delete() dòng 147-173
+public function delete(): void {
+    $id = (int)$this->post('id');
+
+    // Bảo vệ: không tự xóa chính mình
+    if ($id === Auth::id()) {
+        Session::flash('error', 'Bạn không thể tự xóa tài khoản của chính mình.');
+        redirect('/employees');
+        return;
+    }
+
+    $employee = $this->userModel->findById($id);
+    if (!$employee) abort(404);
+
+    $this->userModel->softDelete($id);
+    // UPDATE users SET deleted_at = NOW() WHERE id = ?
+    // Không xóa khỏi DB thật — giữ lại lịch sử
+
+    $this->sysModel->writeAudit(['action' => 'DELETE_EMPLOYEE', ...]);
+
+    Session::flash('success', "Đã xóa nhân viên {$employee['full_name']} thành công.");
+    redirect('/employees');
+}
+```
+
+---
+
+### 4.5 Khóa / Mở khóa tài khoản
+
+#### 4.5.1 Form thường (POST)
+
+| | Chi tiết |
+|---|---|
+| **Route** | `POST /employees/toggle-status` |
+| **Controller** | `EmployeeController::toggleStatus()` dòng 124-145 |
+| **AJAX** | ❌ Không (reload trang) |
+
+```php
+$newStatus = $employee['status'] === 'ACTIVE' ? 'LOCKED' : 'ACTIVE';
+$this->userModel->updateStatus($id, $newStatus);
+// UPDATE users SET status = ? WHERE id = ?
+$this->sysModel->writeAudit(['action' => "SET_STATUS_{$newStatus}", ...]);
+Session::flash('success', 'Tài khoản đã được ' . ($newStatus === 'LOCKED' ? 'khóa' : 'mở khóa') . '.');
+redirect('/employees');
+```
+
+#### 4.5.2 🔴 AJAX (không reload trang)
+
+| | Chi tiết |
+|---|---|
+| **Route** | `POST /ajax/employees/toggle-status` |
+| **Controller** | `EmployeeController::ajaxToggleStatus()` dòng 213-245 |
+
+```js
+// employees/index.php — bắt click qua event delegation
+$(document).on('click', '.btn-ajax-toggle', function() {
+    const id            = $(this).data('id');
+    const currentStatus = $(this).data('status');  // 'ACTIVE' hoặc 'LOCKED'
+    if (!confirm('Xác nhận ' + (currentStatus === 'ACTIVE' ? 'khóa' : 'mở khóa') + '?')) return;
+
+    $.ajax({
+        url: BASE + '/ajax/employees/toggle-status',
+        method: 'POST',
+        data: { id },
+        success: function(res) {
+            // Cập nhật DOM tại chỗ không reload
+            $(`#status-cell-${id}`).html(...); // đổi chấm + nhãn trạng thái
+            $(this).data('status', res.new_status);
+            showToast(res.new_status === 'ACTIVE' ? '✓ Đã mở khóa.' : '🔒 Đã khóa.', 'success');
+        }
+    });
+});
+```
+
+```php
+// EmployeeController::ajaxToggleStatus()
+// Bảo vệ: không tự khóa mình → json(['success'=>false, 'message'=>'...'])
+// Tìm employee → updateStatus() → writeAudit()
+// Trả về: json(['success'=>true, 'new_status'=>$newStatus, 'label'=>$label])
+```
+
+---
+
+### 4.6 🔴 AJAX: Live Search nhân viên
+
+| | Chi tiết |
+|---|---|
+| **Route** | `GET /ajax/employees/search` |
+| **Controller** | `EmployeeController::ajaxSearch()` dòng 178-208 |
+
+```js
+// employees/index.php — debounce 300ms
+let searchTimer;
+$('#liveSearch').on('input', function() {
+    clearTimeout(searchTimer);
+    searchTimer = setTimeout(function() {
+        $.ajax({
+            url: BASE + '/ajax/employees/search',
+            method: 'GET',
+            data: { q, department, role, status },
+            success: function(res) { renderEmployeeRows(res.data); }
+        });
+    }, 300);
+});
+
+// Dropdown bộ lọc cũng kích hoạt live search
+$('select[name="department"], select[name="role"], select[name="status"]')
+    .on('change', () => $('#liveSearch').trigger('input'));
+```
+
+```php
+// EmployeeController::ajaxSearch()
+$employees = $this->userModel->findFiltered($filters, 1, 50);
+// Trả về JSON với mảng employee đã map thêm: role_label, status_label, initials
+echo json_encode(['success' => true, 'data' => $result, 'total' => count($result)]);
+```
+
+---
+
+## 5. Nghỉ phép (`/leave`)
+
+### 5.1 Danh sách đơn nghỉ phép
+
+| | Chi tiết |
+|---|---|
+| **Route** | `GET /leave` |
+| **Controller** | `LeaveController::index()` dòng 22-43 |
+
+```php
+if (Auth::isAdmin()) {
+    $status = $this->get('status', '');  // lọc theo trạng thái qua URL ?status=PENDING
+    $leaves = $this->leaveModel->findAll($status, $page);
+        // SELECT lr.*, u.full_name, u.employee_code
+        // FROM leave_requests lr JOIN users u ON lr.employee_id = u.id
+        // WHERE ($status ? "lr.status = ?" : "1=1")
+        // ORDER BY created_at DESC LIMIT 20 OFFSET ?
+    $total  = $this->leaveModel->countAll($status);
+} else {
+    // Nhân viên chỉ thấy đơn của mình
+    $leaves = $this->leaveModel->findByEmployee(Auth::id(), $page);
+    $total  = count($leaves);
+}
+```
+
+---
+
+### 5.2 Tạo đơn nghỉ phép (CREATE)
+
+| | Chi tiết |
+|---|---|
+| **Route** | `GET /leave/create` → form, `POST /leave/store` → xử lý |
+| **Controller** | `LeaveController::create()` dòng 45, `store()` dòng 49-84 |
+| **View** | `app/views/leave/create.php` |
+| **AJAX** | ❌ Không |
+
+```
+POST /leave/store — LeaveController::store()
+  → Bước 1: Lấy dữ liệu
+      $employeeId = Auth::id()
+      $startDate  = $_POST['start_date']       // YYYY-MM-DD
+      $endDate    = $_POST['end_date']          // YYYY-MM-DD
+      $leaveType  = $_POST['leave_type']        // ANNUAL / SICK / UNPAID / OTHER
+      $reason     = trim($_POST['reason'])
+
+  → Bước 2: Validate
+      - startDate hoặc endDate rỗng → 'Vui lòng chọn ngày bắt đầu và kết thúc.'
+      - startDate > endDate          → 'Ngày bắt đầu phải trước hoặc bằng ngày kết thúc.'
+      - leaveType rỗng               → 'Vui lòng chọn loại nghỉ phép.'
+      - strlen(reason) < 5           → 'Lý do nghỉ phải ít nhất 5 ký tự.'
+
+  → Bước 3: Kiểm tra trùng lịch
+      $this->leaveModel->hasOverlap($employeeId, $startDate, $endDate)
+      // SELECT COUNT(*) FROM leave_requests
+      // WHERE employee_id=? AND status NOT IN ('REJECTED','CANCELLED')
+      //   AND start_date <= ? AND end_date >= ?
+      → Nếu có trùng: 'Bạn đã có đơn nghỉ trùng khoảng thời gian này.'
+
+  → Bước 4: Nếu lỗi → render('leave/create', ['errors'=>..., 'old'=>$_POST])
+
+  → Bước 5: Lưu vào DB
+      $this->leaveModel->create([
+          'employee_id' => $employeeId,
+          'leave_type'  => $leaveType,
+          'start_date'  => $startDate,
+          'end_date'    => $endDate,
+          'reason'      => $reason,
+          // status mặc định = 'PENDING'
+      ])
+      // INSERT INTO leave_requests (employee_id, leave_type, start_date, end_date, reason, status)
+
+  → Session::flash('success', 'Gửi đơn nghỉ phép thành công. Chờ duyệt.')
+  → redirect('/leave')
+```
+
+---
+
+### 5.3 Hủy đơn nghỉ phép (CANCEL — nhân viên tự hủy)
+
+| | Chi tiết |
+|---|---|
+| **Route** | `POST /leave/cancel` |
+| **Controller** | `LeaveController::cancel()` dòng 86-106 |
+| **AJAX** | ❌ Không |
+
+```php
+$id    = (int)$this->post('id');
+$leave = $this->leaveModel->findById($id);
+
+// Kiểm tra tồn tại
+if (!$leave) abort(404);
+
+// Kiểm tra ownership — NV chỉ hủy đơn của mình
+if (!Auth::isAdmin() && (int)$leave['employee_id'] !== Auth::id()) abort(403);
+
+// Chỉ hủy được đơn đang PENDING
+if ($leave['status'] !== 'PENDING') {
+    Session::flash('error', 'Chỉ có thể hủy đơn đang chờ duyệt.');
+    redirect('/leave');
+}
+
+$this->leaveModel->cancel($id);
+// UPDATE leave_requests SET status='CANCELLED', updated_at=NOW() WHERE id=?
+
+Session::flash('success', 'Đã hủy đơn nghỉ phép.');
+redirect('/leave');
+```
+
+---
+
+### 5.4 Duyệt đơn nghỉ phép (APPROVE — Admin)
+
+#### 5.4.1 Form thường (POST)
+
+| | Chi tiết |
+|---|---|
+| **Route** | `POST /leave/approve` |
+| **Controller** | `LeaveController::approve()` dòng 108-138 |
+| **AJAX** | ❌ Không (reload trang) |
+
+```php
+$id    = (int)$this->post('id');
+$leave = $this->leaveModel->findById($id);
+if (!$leave || $leave['status'] !== 'PENDING') abort(404);
+
+$employeeId = (int)$leave['employee_id'];
+
+// Duyệt đơn
+$this->leaveModel->approve($id, Auth::id());
+// UPDATE leave_requests SET status='APPROVED', approved_by=?, approved_at=NOW() WHERE id=?
+
+// Tự động gỡ ca đã phân cho NV trong khoảng ngày nghỉ
+$removedAssignments = $this->workModel->removeAssignmentsByEmployeeInRange(
+    $employeeId, $leave['start_date'], $leave['end_date'],
+    'AUTO_REMOVED_DUE_TO_APPROVED_LEAVE'
+);
+// UPDATE work_records SET record_status='CANCELLED', meta=JSON WHERE ...
+
+$this->sysModel->writeAudit(['action' => 'APPROVE_LEAVE', ...]);
+Session::flash('success', 'Đã duyệt đơn nghỉ phép.');
+redirect('/leave');
+```
+
+#### 5.4.2 🔴 AJAX (không reload trang)
+
+| | Chi tiết |
+|---|---|
+| **Route** | `POST /ajax/leave/approve` |
+| **Controller** | `LeaveController::ajaxApprove()` dòng 171-201 |
+
+```js
+// leave/index.php
+$(document).on('click', '.btn-ajax-approve', function() {
+    const id = $(this).data('id');
+    if (!confirm('Duyệt đơn nghỉ phép này?')) return;
+    $.ajax({
+        url: LEAVE_BASE + '/ajax/leave/approve', method: 'POST', data: { id },
+        success: function(res) {
+            // Đổi badge tại hàng đó: 'Chờ duyệt' → 'Đã duyệt'
+            btn.closest('tr').find('.badge').removeClass().addClass('badge badge-approved').text('Đã duyệt');
+            // Ẩn nút Duyệt/Từ chối
+            btn.closest('tr').find('td:last-child').html('<span>—</span>');
+            showLeaveToast('✓ Đã duyệt đơn.', 'success');
+        }
+    });
+});
+```
+
+Logic PHP giống `approve()` ở trên, nhưng trả về JSON thay vì redirect.
+
+---
+
+### 5.5 Từ chối đơn nghỉ phép (REJECT — Admin)
+
+#### 5.5.1 Form thường (POST)
+
+| | Chi tiết |
+|---|---|
+| **Route** | `POST /leave/reject` |
+| **Controller** | `LeaveController::reject()` dòng 140-166 |
+| **AJAX** | ❌ Không |
+
+```php
+$id     = (int)$this->post('id');
+$reason = trim($this->post('rejection_reason', ''));
+
+if (empty($reason)) {
+    Session::flash('error', 'Vui lòng nhập lý do từ chối.');
+    redirect('/leave');
+}
+
+$this->leaveModel->reject($id, Auth::id(), $reason);
+// UPDATE leave_requests SET
+//   status='REJECTED', rejected_by=?, rejected_at=NOW(), rejection_reason=?
+// WHERE id=?
+
+$this->sysModel->writeAudit(['action' => 'REJECT_LEAVE', ...]);
+Session::flash('success', 'Đã từ chối đơn nghỉ phép.');
+redirect('/leave');
+```
+
+#### 5.5.2 🔴 AJAX (không reload trang)
+
+| | Chi tiết |
+|---|---|
+| **Route** | `POST /ajax/leave/reject` |
+| **Controller** | `LeaveController::ajaxReject()` dòng 206-235 |
+
+```js
+// leave/index.php — 2 bước: mở modal → xác nhận
+
+// Bước 1: click nút "Từ chối" → mở modal nhập lý do
+function showRejectForm(id) {
+    rejectLeaveId = id;
+    $('#rejectReason').val('');
+    $('#rejectModal').css('display', 'flex');
+}
+
+// Bước 2: bấm nút xác nhận trong modal
+$('#btnConfirmReject').on('click', function() {
+    const reason = $('#rejectReason').val().trim();
+    if (!reason) { alert('Vui lòng nhập lý do từ chối.'); return; }
+
+    $.ajax({
+        url: LEAVE_BASE + '/ajax/leave/reject',
+        method: 'POST',
+        data: { id: rejectLeaveId, rejection_reason: reason },
+        success: function(res) {
+            hideRejectForm();
+            // Đổi badge → 'Từ chối'
+            $(`button[data-id="${rejectLeaveId}"]`).closest('tr').find('.badge')
+                .removeClass().addClass('badge badge-rejected').text('Từ chối');
+            showLeaveToast('✗ Đã từ chối đơn.', 'danger');
+        }
+    });
+});
+```
+
+---
+
+## 6. Chấm công (`/attendance`)
+
+### 6.1 Xem bảng chấm công
+
+| | Chi tiết |
+|---|---|
+| **Route** | `GET /attendance` |
+| **Controller** | `AttendanceController::index()` dòng 22-49 |
+
+```php
+$month     = $this->get('month', date('Y-m'));     // mặc định tháng hiện tại
+$startDate = $month . '-01';
+$endDate   = date('Y-m-t', strtotime($startDate)); // ngày cuối tháng (Y-m-t = last day)
+
+if (Auth::isAdmin()) {
+    $employeeId = (int)$this->get('employee', 0);
+    $employees  = $this->userModel->findAll();      // để hiện dropdown chọn NV
+    $attendance = $employeeId
+        ? $this->workModel->getAttendanceByEmployee($employeeId, $startDate, $endDate)
+        : [];
+    // SELECT wr.*, u.full_name FROM work_records wr JOIN users u ON ...
+    // WHERE wr.employee_id=? AND wr.record_type='ATTENDANCE'
+    //   AND wr.work_date BETWEEN ? AND ?
+    // ORDER BY wr.work_date
+} else {
+    $employeeId = Auth::id();
+    $employees  = [];
+    $attendance = $this->workModel->getAttendanceByEmployee(Auth::id(), $startDate, $endDate);
+}
+```
+
+---
+
+### 6.2 Sửa bản ghi chấm công
+
+#### 6.2.1 Form thường (POST — dự phòng)
+
+| | Chi tiết |
+|---|---|
+| **Route** | `POST /attendance/update` |
+| **Controller** | `AttendanceController::update()` dòng 51-95 |
+| **AJAX** | ❌ Không (reload trang) |
+
+```php
+$id  = (int)$this->post('id');
+$row = $this->workModel->getAttendanceById($id);
+if (!$row) abort(404);
+
+$checkIn  = $this->post('check_in_at');   // format: Y-m-d H:i:s
+$checkOut = $this->post('check_out_at');
+$note     = $this->post('note');
+
+if (!$checkIn || !$checkOut) {
+    Session::flash('error', 'Vui lòng nhập đầy đủ giờ vào/ra.');
+    redirect('/attendance');
+}
+
+// Tính lại phút làm việc
+$workedMin = (int)((strtotime($checkOut) - strtotime($checkIn)) / 60
+                   - ($row['break_minutes'] ?? 30));
+$workedMin = max(0, $workedMin);
+
+$this->workModel->updateAttendance($id, [
+    'check_in_at'      => $checkIn,
+    'check_out_at'     => $checkOut,
+    'worked_minutes'   => $workedMin,
+    'late_minutes'     => (int)$this->post('late_minutes', 0),
+    'overtime_minutes' => (int)$this->post('overtime_minutes', 0),
+    'note'             => $note,
+]);
+// UPDATE work_records SET check_in_at=?, check_out_at=?, worked_minutes=?,
+//   late_minutes=?, overtime_minutes=?, note=?, updated_at=NOW()
+// WHERE id=?
+
+$this->sysModel->writeAudit(['action' => 'UPDATE_ATTENDANCE', ...]);
+Session::flash('success', 'Đã cập nhật chấm công.');
+redirect('/attendance');
+```
+
+#### 6.2.2 🔴 AJAX (không reload trang — đây là cách chính)
+
+| | Chi tiết |
+|---|---|
+| **Route** | `POST /ajax/attendance/update` |
+| **Controller** | `AttendanceController::ajaxUpdate()` dòng 100-154 |
+
+**Bắt sự kiện — `attendance/index.php`:**
+
+```html
+<!-- Truyền toàn bộ $row dưới dạng JSON vào JS -->
+<button onclick="openEditModal(<?= htmlspecialchars(json_encode($row)) ?>)">
+```
+
+```js
+// 1. Mở modal: điền sẵn dữ liệu hiện tại
+function openEditModal(row) {
+    currentAttId = row.id;
+    $('#editCheckIn').val(row.check_in_at.replace(' ', 'T').substr(0,16));
+    $('#editCheckOut').val(row.check_out_at.replace(' ', 'T').substr(0,16));
+    $('#editLate').val(row.late_minutes || 0);
+    $('#editOvertime').val(row.overtime_minutes || 0);
+    $('#editNote').val('');  // bắt buộc nhập lý do mới
+    $('#editModal').css('display', 'flex');
+}
+
+// 2. Nhấn Lưu
+$('#btnSaveAttendance').on('click', function() {
+    const checkIn  = $('#editCheckIn').val();
+    const checkOut = $('#editCheckOut').val();
+    const note     = $('#editNote').val().trim();
+
+    // Validate phía client
+    if (!checkIn || !checkOut) { alert('Nhập đủ giờ vào/ra.'); return; }
+    if (!note) { alert('Nhập lý do chỉnh sửa.'); return; }
+
+    $.ajax({
+        url: ATT_BASE + '/ajax/attendance/update', method: 'POST',
+        data: { id: currentAttId, check_in_at: checkIn, check_out_at: checkOut,
+                late_minutes: $('#editLate').val(), overtime_minutes: $('#editOvertime').val(),
+                note },
+        success: function(res) {
+            if (!res.success) { alert(res.message); return; }
+            // Cập nhật ô trong bảng: dùng data-att-id trên <tr> và class att-* trên <td>
+            const tr = $(`tr[data-att-id="${currentAttId}"]`);
+            tr.find('.att-checkin').text(res.check_in);    // "08:00"
+            tr.find('.att-checkout').text(res.check_out);  // "17:00"
+            tr.find('.att-worked').text(res.worked_hours + ' giờ'); // "8 giờ"
+            closeEditModal();
+            showAttToast('✓ Đã cập nhật.', 'success');
+        }
+    });
+});
+```
+
+**PHP xử lý — `ajaxUpdate()`:**
+
+```php
+// Validate: bản ghi tồn tại, checkIn/checkOut không rỗng, note không rỗng
+// Tính workedMin = (strtotime(checkOut) - strtotime(checkIn)) / 60 - breakMinutes
+// updateAttendance() + writeAudit()
+// Trả JSON: { success, check_in: "H:i", check_out: "H:i", worked_hours: 8.0 }
+```
+
+---
+
+## 7. Bảng lương (`/payroll`)
+
+### 7.1 Danh sách kỳ lương (Admin) / Phiếu lương của mình (NV)
+
+| | Chi tiết |
+|---|---|
+| **Route** | `GET /payroll` |
+| **Controller** | `PayrollController::index()` dòng 25-33 |
+| **AJAX** | ❌ Không |
+
+```php
+if (Auth::isAdmin()) {
+    $periods = $this->payModel->getAllPeriods();
+    // SELECT * FROM payroll_records WHERE record_type='PERIOD' ORDER BY created_at DESC
+    render('payroll/index', ['periods' => $periods, 'pageCSS' => 'pages/payroll.css']);
+} else {
+    $items = $this->payModel->getPublishedItemsByEmployee(Auth::id());
+    // SELECT pr.*, pp.name, pp.period_start, pp.period_end
+    // FROM payroll_records pr JOIN payroll_records pp ON pr.parent_id = pp.id
+    // WHERE pr.record_type='PAYSLIP' AND pr.employee_id=? AND pr.status='PUBLISHED'
+    render('payroll/my_payslips', ['items' => $items, 'pageCSS' => 'pages/payroll.css']);
+}
+```
+
+---
+
+### 7.2 Tạo kỳ lương mới (CREATE — Admin)
+
+| | Chi tiết |
+|---|---|
+| **Route** | `GET /payroll/create-period` → form, `POST /payroll/store-period` → lưu |
+| **Controller** | `PayrollController::createPeriod()` dòng 35, `storePeriod()` dòng 39-71 |
+| **View** | `app/views/payroll/create_period.php` |
+| **AJAX** | ❌ Không |
+
+**Form** (`create_period.php`):
+
+```html
+<form method="POST" action="<?= BASE_URL ?>/payroll/store-period">
+    <input type="text"  name="name"         required placeholder="Ví dụ: Lương tháng 5/2025">
+    <input type="date"  name="period_start" required>
+    <input type="date"  name="period_end"   required>
+    <button type="submit">Tạo kỳ lương</button>
+</form>
+```
+
+```
+POST /payroll/store-period — PayrollController::storePeriod()
+  → Bước 1: Lấy dữ liệu
+      $name  = trim($this->post('name', ''))
+      $start = $this->post('period_start')
+      $end   = $this->post('period_end')
+
+  → Bước 2: Validate
+      - name rỗng        → 'Tên kỳ lương không được để trống.'
+      - start hoặc end rỗng → 'Vui lòng chọn ngày bắt đầu và kết thúc.'
+      - start > end      → 'Ngày bắt đầu phải trước ngày kết thúc.'
+
+  → Bước 3: Nếu lỗi → render('payroll/create_period', ['errors' => $errors])
+
+  → Bước 4: Lưu vào DB
+      $periodId = $this->payModel->createPeriod([
+          'name'         => $name,
+          'period_start' => $start,
+          'period_end'   => $end,
+          'created_by'   => Auth::id(),
+      ])
+      // INSERT INTO payroll_records (record_type, name, period_start, period_end, status, created_by)
+      // VALUES ('PERIOD', ?, ?, ?, 'DRAFT', ?)
+
+  → Bước 5: Ghi audit + redirect
+      $this->sysModel->writeAudit(['action' => 'CREATE_PAYROLL_PERIOD', ...])
+      Session::flash('success', 'Tạo kỳ lương thành công.')
+      redirect('/payroll')
+```
+
+---
+
+### 7.3 Tính lương (CALCULATE — Admin)
+
+| | Chi tiết |
+|---|---|
+| **Route** | `POST /payroll/calculate` |
+| **Controller** | `PayrollController::calculate()` dòng 76-142 |
+| **AJAX** | ❌ Không |
+
+```
+POST /payroll/calculate (form với hidden input period_id)
+  → Lấy period từ DB → kiểm tra tồn tại
+
+  → Lấy toàn bộ nhân viên active:
+      $employees = $this->userModel->findAll()
+
+  → Với mỗi nhân viên:
+      // 1. Lấy tổng hợp công trong kỳ
+      $summary = $this->workModel->getAttendanceSummary(
+          $emp['id'], $period['period_start'], $period['period_end']
+      )
+      // SELECT SUM(worked_minutes), SUM(overtime_minutes), SUM(late_minutes)
+      // FROM work_records WHERE record_type='ATTENDANCE' AND employee_id=?
+      //   AND work_date BETWEEN ? AND ?
+
+      // 2. Công thức tính lương
+      $baseAmount     = ($workedMin / 60) * $hourlyRate          // lương giờ làm thực
+      $overtimeAmount = ($overtimeMin / 60) * $hourlyRate * 1.5  // tăng ca x1.5
+      $deductionAmount= ($lateMin / 60) * $hourlyRate * 0.5     // trừ đi muộn x0.5
+      $finalAmount    = $baseAmount + $overtimeAmount - $deductionAmount
+
+      // 3. Lưu phiếu lương (upsert — tính lại nếu đã tồn tại)
+      $this->payModel->upsertItem([
+          'period_id'        => $periodId,
+          'employee_id'      => $emp['id'],
+          'period_start'     => $period['period_start'],
+          'period_end'       => $period['period_end'],
+          'base_amount'      => $baseAmount,
+          'overtime_amount'  => $overtimeAmount,
+          'allowance_amount' => 0.0,
+          'deduction_amount' => $deductionAmount,
+          'final_amount'     => $finalAmount,
+          'snapshot'         => [...],  // JSON lưu lại công thức
+          'created_by'       => Auth::id(),
+      ])
+
+  → Cập nhật trạng thái kỳ: DRAFT → CALCULATED
+      $this->payModel->updatePeriodStatus($periodId, 'CALCULATED')
+
+  → Ghi audit + redirect('/payroll')
+```
+
+---
+
+### 7.4 Công bố lương (PUBLISH — Admin)
+
+| | Chi tiết |
+|---|---|
+| **Route** | `POST /payroll/publish` |
+| **Controller** | `PayrollController::publish()` dòng 147-171 |
+| **AJAX** | ❌ Không |
+
+```php
+$periodId = (int)$this->post('period_id');
+$period   = $this->payModel->getPeriodById($periodId);
+if (!$period) abort(404);
+
+// Business rule: không publish nếu còn ticket liên quan đang mở
+if ($this->sysModel->hasOpenTicketsForPeriod($periodId)) {
+    Session::flash('error', 'Không thể publish lương khi còn ticket đang mở liên quan đến kỳ này.');
+    redirect('/payroll');
+    return;
+}
+
+$this->payModel->publishItems($periodId);
+// UPDATE payroll_records SET status='PUBLISHED', published_at=NOW()
+// WHERE parent_id=? AND record_type='PAYSLIP'
+
+$this->payModel->updatePeriodStatus($periodId, 'PUBLISHED');
+// UPDATE payroll_records SET status='PUBLISHED' WHERE id=? AND record_type='PERIOD'
+
+$this->sysModel->writeAudit(['action' => 'PUBLISH_PAYROLL', ...]);
+Session::flash('success', 'Đã publish phiếu lương cho nhân viên.');
+redirect('/payroll');
+```
+
+---
+
+### 7.5 Xem chi tiết kỳ lương / Phiếu lương
+
+| | Chi tiết |
+|---|---|
+| **Route** | `GET /payroll/view?period=X` |
+| **Controller** | `PayrollController::view()` dòng 176-192 |
+| **AJAX** | ❌ Không |
+
+```php
+if (Auth::isAdmin()) {
+    $items = $this->payModel->getItemsByPeriod($periodId);
+    // SELECT pr.*, u.full_name, u.employee_code
+    // FROM payroll_records pr JOIN users u ON pr.employee_id = u.id
+    // WHERE pr.parent_id=? AND pr.record_type='PAYSLIP'
+    render('payroll/view_period', ['period' => $period, 'items' => $items]);
+} else {
+    $item = $this->payModel->getItemByEmployeeAndPeriod(Auth::id(), $periodId);
+    // Ownership + published check
+    if (!$item || $item['period_status'] !== 'PUBLISHED') {
+        abort(403, 'Phiếu lương chưa được công bố.');
+    }
+    render('payroll/view_payslip', ['period' => $period, 'item' => $item]);
+}
+```
+
+---
+
+## 8. Lịch làm việc (`/schedule`)
+
+### 8.1 Xem lịch
+
+| | Chi tiết |
+|---|---|
+| **Route** | `GET /schedule?period=X` |
+| **Controller** | `ScheduleController::index()` dòng 28-56 |
+| **AJAX** | ❌ Không |
+
+```php
+$periods = $this->workModel->getAllPeriods();
+// SELECT * FROM work_records WHERE record_type='SCHEDULE_PERIOD' ORDER BY week_start_date DESC
+
+$activePeriodId = (int)$this->get('period');
+if ($activePeriodId) {
+    $slots = $this->workModel->getSlotsByPeriod($activePeriodId);
+    // SELECT * FROM work_records WHERE parent_id=? AND record_type='SHIFT_SLOT'
+
+    foreach ($slots as $slot) {
+        $slotDetails[$slot['id']] = [
+            'assignments'   => $this->workModel->getAssignmentsBySlot($slot['id']),
+            // SELECT wr.*, u.full_name FROM work_records wr JOIN users u ON ...
+            // WHERE wr.parent_id=? AND wr.record_type='ASSIGNMENT'
+
+            'registrations' => Auth::isAdmin()
+                ? $this->workModel->getRegistrationsBySlot($slot['id'])
+                : [],
+            // SELECT wr.*, u.full_name FROM work_records wr JOIN users u ON ...
+            // WHERE wr.parent_id=? AND wr.record_type='REGISTRATION'
+        ];
+    }
+}
+```
+
+---
+
+### 8.2 Tạo kỳ lịch mới (CREATE — Admin)
+
+| | Chi tiết |
+|---|---|
+| **Route** | `GET /schedule/create-period` → form, `POST /schedule/store-period` → lưu |
+| **Controller** | `ScheduleController::createPeriod()` dòng 61, `storePeriod()` dòng 65-99 |
+| **AJAX** | ❌ Không |
+
+```
+POST /schedule/store-period
+  → Validate:
+      - weekStart hoặc weekEnd rỗng → 'Vui lòng chọn đầy đủ ngày bắt đầu và kết thúc tuần.'
+      - weekStart > weekEnd         → 'Ngày bắt đầu phải trước ngày kết thúc.'
+
+  → Tạo kỳ lịch
+      $periodId = $this->workModel->createPeriod([
+          'week_start_date' => $weekStart,
+          'week_end_date'   => $weekEnd,
+          'note'            => $note,
+          'created_by'      => Auth::id(),
+      ])
+      // INSERT INTO work_records (record_type, week_start_date, week_end_date, ...)
+
+  → Tự động tạo 3 ca mặc định cho mỗi ngày trong tuần (generateDefaultSlots())
+      Ca Sáng:  06:00 - 14:00
+      Ca Chiều: 14:00 - 22:00
+      Ca Đêm:   22:00 - 06:00 (is_night_shift=1)
+      // Tạo 3 × 7 = 21 slots
+      // INSERT INTO work_records (record_type, parent_id, work_date, shift_name, start_time, end_time, ...)
+
+  → Ghi audit, redirect('/schedule?period={$periodId}')
+```
+
+---
+
+### 8.3 Mở đăng ký ca (Admin)
+
+| | Chi tiết |
+|---|---|
+| **Route** | `POST /schedule/open-registration` |
+| **Controller** | `ScheduleController::openRegistration()` dòng 104-123 |
+
+```php
+$id     = (int)$this->post('period_id');
+$period = $this->workModel->getPeriodById($id);
+if (!$period) abort(404);
+
+$this->workModel->updatePeriodStatus($id, 'REGISTRATION_OPEN', [
+    'registration_open_at'  => date('Y-m-d H:i:s'),
+    'registration_close_at' => $this->post('close_at'),
+]);
+// UPDATE work_records SET record_status='REGISTRATION_OPEN',
+//   meta = JSON_SET(meta, 'registration_open_at', ?, 'registration_close_at', ?)
+// WHERE id=?
+
+Session::flash('success', 'Đã mở đăng ký ca.');
+redirect("/schedule?period={$id}");
+```
+
+---
+
+### 8.4 Nhân viên đăng ký ca
+
+| | Chi tiết |
+|---|---|
+| **Route** | `POST /schedule/register-slot` |
+| **Controller** | `ScheduleController::registerSlot()` dòng 152-188 |
+| **AJAX** | ❌ Không |
+
+```
+POST /schedule/register-slot
+  → $slotId = (int)$_POST['slot_id']
+  → $slot   = $this->workModel->getSlotById($slotId)
+
+  → Kiểm tra 1: Ca phải OPEN (status='OPEN')
+      'Ca này không còn mở đăng ký.'
+
+  → Kiểm tra 2: Kỳ phải REGISTRATION_OPEN
+      $period = $this->workModel->getPeriodById($slot['parent_id'])
+      'Thời gian đăng ký đã đóng.'
+
+  → Kiểm tra 3: Không trùng ngày nghỉ phép đã duyệt
+      $blockedDates = $this->leaveModel->getBlockedDates(Auth::id())
+      // SELECT start_date, end_date FROM leave_requests
+      // WHERE employee_id=? AND status='APPROVED'
+      → Tạo mảng tất cả ngày bị blocked
+      if (in_array($slot['work_date'], $blockedDates)) {
+          'Bạn có đơn nghỉ phép trong ngày này.'
+      }
+
+  → Kiểm tra 4: Chưa đăng ký ca này
+      $existing = $this->workModel->getRegistrationByEmployeeAndSlot(Auth::id(), $slotId)
+      'Bạn đã đăng ký ca này rồi.'
+
+  → Tạo đăng ký:
+      $this->workModel->createRegistration([
+          'slot_id'     => $slotId,
+          'employee_id' => Auth::id(),
+          'note'        => $this->post('note'),
+      ])
+      // INSERT INTO work_records (record_type, parent_id, employee_id, note, ...)
+      // VALUES ('REGISTRATION', ?, ?, ?, ...)
+
+  → Session::flash('success', 'Đăng ký ca thành công.')
+  → redirect("/schedule?period={$slot['parent_id']}")
+```
+
+---
+
+### 8.5 Admin phân ca cho nhân viên
+
+| | Chi tiết |
+|---|---|
+| **Route** | `POST /schedule/assign` |
+| **Controller** | `ScheduleController::assign()` dòng 194-238 |
+| **AJAX** | ❌ Không |
+
+```
+POST /schedule/assign
+  → $slotId     = (int)$_POST['slot_id']
+  → $employeeId = (int)$_POST['employee_id']
+  → Tìm slot và employee → nếu không có abort(404)
+
+  → Kiểm tra 1: Nhân viên không có đơn nghỉ ngày đó
+      $blockedDates = $this->leaveModel->getBlockedDates($employeeId)
+      "Nhân viên {$employee['full_name']} có đơn nghỉ phép trong ngày này."
+
+  → Kiểm tra 2: Không trùng giờ với ca khác đã phân
+      $this->workModel->hasConflictingAssignment(
+          $employeeId, $slot['work_date'], $slot['start_time'], $slot['end_time']
+      )
+      // SELECT COUNT(*) FROM work_records
+      // WHERE record_type='ASSIGNMENT' AND employee_id=? AND work_date=?
+      //   AND start_time < ? AND end_time > ?
+      "Nhân viên đã có ca trùng giờ."
+
+  → Tạo phân ca:
+      $this->workModel->createAssignment([
+          'slot_id'     => $slotId,
+          'employee_id' => $employeeId,
+          'work_date'   => $slot['work_date'],
+          'shift_name'  => $slot['shift_name'],
+          'start_time'  => $slot['start_time'],
+          'end_time'    => $slot['end_time'],
+          'created_by'  => Auth::id(),
+      ])
+      // INSERT INTO work_records (record_type, parent_id, employee_id,
+      //   work_date, shift_name, start_time, end_time, created_by, ...)
+
+  → Ghi audit, redirect("/schedule?period={$slot['parent_id']}")
+```
+
+---
+
+### 8.6 Gỡ phân ca (Admin)
+
+| | Chi tiết |
+|---|---|
+| **Route** | `POST /schedule/remove-assignment` |
+| **Controller** | `ScheduleController::removeAssignment()` dòng 243-259 |
+| **AJAX** | ❌ Không |
+
+```php
+$id     = (int)$this->post('assignment_id');
+$reason = $this->post('reason', 'Gỡ thủ công bởi Admin');
+
+$this->workModel->removeAssignment($id, $reason);
+// UPDATE work_records SET record_status='CANCELLED',
+//   meta = JSON_SET(meta, 'removal_reason', ?) WHERE id=?
+
+$this->sysModel->writeAudit(['action' => 'REMOVE_ASSIGNMENT', ...]);
+Session::flash('success', 'Đã gỡ phân ca.');
+redirect('/schedule');
+```
+
+---
+
+### 8.7 Publish lịch (Admin)
+
+| | Chi tiết |
+|---|---|
+| **Route** | `POST /schedule/publish` |
+| **Controller** | `ScheduleController::publish()` dòng 128-147 |
+
+```php
+$this->workModel->updatePeriodStatus($id, 'PUBLISHED', ['published_at' => date('Y-m-d H:i:s')]);
+// DRAFT → REGISTRATION_OPEN → REVIEWING → PUBLISHED
+Session::flash('success', 'Lịch đã được publish.');
+redirect("/schedule?period={$id}");
+```
+
+---
+
+## 9. Khiếu nại (`/tickets`)
+
+### 9.1 Danh sách ticket
+
+| | Chi tiết |
+|---|---|
+| **Route** | `GET /tickets` |
+| **Controller** | `TicketController::index()` dòng 16-26 |
+
+```php
+if (Auth::isAdmin()) {
+    $status  = $this->get('status', '');
+    $tickets = $this->sysModel->getAllTickets($status);
+    // SELECT sr.*, u.full_name, u.employee_code
+    // FROM system_records sr JOIN users u ON sr.employee_id = u.id
+    // WHERE sr.record_type='TICKET' AND ($status ? "sr.status=?" : "1=1")
+    // ORDER BY created_at DESC
+} else {
+    $tickets = $this->sysModel->getTicketsByEmployee(Auth::id());
+    // SELECT * FROM system_records WHERE record_type='TICKET' AND employee_id=?
+}
+```
+
+---
+
+### 9.2 Tạo khiếu nại (CREATE)
+
+| | Chi tiết |
+|---|---|
+| **Route** | `GET /tickets/create` → form, `POST /tickets/store` → lưu |
+| **Controller** | `TicketController::create()` dòng 28, `store()` dòng 32-58 |
+| **View** | `app/views/tickets/create.php` |
+| **AJAX** | ❌ Không |
+
+```
+POST /tickets/store — TicketController::store()
+  → Bước 1: Lấy dữ liệu
+      $title       = trim($_POST['title'])
+      $description = trim($_POST['description'])
+      $entityType  = $_POST['related_entity_type']  // payroll_period / work_records / general
+      $entityId    = (int)$_POST['related_entity_id']
+
+  → Bước 2: Validate
+      - strlen(title) < 5       → 'Tiêu đề phải ít nhất 5 ký tự.'
+      - strlen(description) < 10 → 'Nội dung khiếu nại phải ít nhất 10 ký tự.'
+      - entityType rỗng          → 'Vui lòng chọn đối tượng khiếu nại.'
+
+  → Bước 3: Nếu lỗi → render('tickets/create', ['errors'=>..., 'old'=>$_POST])
+
+  → Bước 4: Lưu vào DB
+      $ticketId = $this->sysModel->createTicket([
+          'employee_id'         => Auth::id(),
+          'related_entity_type' => $entityType,
+          'related_entity_id'   => $entityId,
+          'title'               => $title,
+          'description'         => $description,
+          // status mặc định = 'OPEN'
+      ])
+      // INSERT INTO system_records (record_type, employee_id, related_entity_type,
+      //   related_entity_id, title, description, status)
+      // VALUES ('TICKET', ?, ?, ?, ?, ?, 'OPEN')
+
+  → Session::flash('success', 'Gửi khiếu nại thành công. Mã ticket: #' . $ticketId)
+  → redirect('/tickets')
+```
+
+---
+
+### 9.3 Xem chi tiết ticket
+
+| | Chi tiết |
+|---|---|
+| **Route** | `GET /tickets/view?id=X` |
+| **Controller** | `TicketController::view()` dòng 60-72 |
+
+```php
+$id     = (int)$this->get('id');
+$ticket = $this->sysModel->findTicketById($id);
+
+if (!$ticket) abort(404);
+
+// Kiểm tra ownership: NV chỉ xem ticket của mình
+if (!Auth::isAdmin() && (int)$ticket['employee_id'] !== Auth::id()) {
+    abort(403);
+}
+
+render('tickets/view', ['ticket' => $ticket]);
+```
+
+---
+
+### 9.4 Cập nhật trạng thái ticket (UPDATE — Admin)
+
+| | Chi tiết |
+|---|---|
+| **Route** | `POST /tickets/update-status` |
+| **Controller** | `TicketController::updateStatus()` dòng 74-97 |
+| **AJAX** | ❌ Không (form POST từ modal) |
+
+**Bắt sự kiện — mở modal:**
+
+```js
+// tickets/index.php dòng 111-114
+function openStatusModal(id) {
+    document.getElementById('statusTicketId').value = id;
+    document.getElementById('statusModal').style.display = 'flex';
+    // Form trong modal submit bình thường → POST /tickets/update-status
+}
+function closeStatusModal() {
+    document.getElementById('statusModal').style.display = 'none';
+}
+```
+
+**PHP xử lý:**
+
+```php
+// TicketController::updateStatus()
+$id     = (int)$this->post('id');
+$status = $this->post('status');      // IN_PROGRESS / RESOLVED / REJECTED / CLOSED
+$note   = trim($this->post('note', ''));
+
+// Validate: chỉ chấp nhận các status hợp lệ
+$allowed = ['IN_PROGRESS', 'RESOLVED', 'REJECTED', 'CLOSED'];
+if (!in_array($status, $allowed, true)) {
+    Session::flash('error', 'Trạng thái không hợp lệ.');
+    redirect('/tickets');
+}
+
+$this->sysModel->updateTicketStatus($id, $status, Auth::id(), $note ?: null);
+// UPDATE system_records SET
+//   status=?, handled_by=?, handled_at=NOW(),
+//   (note: nếu có) resolution_note=?
+// WHERE id=? AND record_type='TICKET'
+
+$this->sysModel->writeAudit(['action' => "TICKET_{$status}", ...]);
+Session::flash('success', "Đã cập nhật ticket sang trạng thái {$status}.");
+redirect('/tickets');
+```
+
+---
+
+## Bảng tổng hợp tất cả chức năng
+
+| Trang | Chức năng | Route | Method | AJAX? |
+|-------|-----------|-------|--------|-------|
+| Auth | Đăng nhập | `/auth/login` | POST | ❌ |
+| Auth | Đăng xuất | `/auth/logout` | GET | ❌ |
+| Profile | Xem hồ sơ | `/profile` | GET | ❌ |
+| Profile | Sửa hồ sơ + đổi mật khẩu | `/profile/edit` | POST | ❌ |
+| Employee | Danh sách + bộ lọc | `/employees` | GET | ❌ |
+| Employee | **Live search** | `/ajax/employees/search` | GET | ✅ AJAX |
+| Employee | Thêm mới | `/employees/store` | POST | ❌ |
+| Employee | Sửa | `/employees/update` | POST | ❌ |
+| Employee | Xóa (soft delete) | `/employees/delete` | POST | ❌ |
+| Employee | **Toggle khóa** | `/ajax/employees/toggle-status` | POST | ✅ AJAX |
+| Leave | Danh sách | `/leave` | GET | ❌ |
+| Leave | Tạo đơn | `/leave/store` | POST | ❌ |
+| Leave | Hủy đơn (NV) | `/leave/cancel` | POST | ❌ |
+| Leave | **Duyệt đơn** | `/ajax/leave/approve` | POST | ✅ AJAX |
+| Leave | **Từ chối đơn** | `/ajax/leave/reject` | POST | ✅ AJAX |
+| Attendance | Xem bảng công | `/attendance` | GET | ❌ |
+| Attendance | **Sửa chấm công** | `/ajax/attendance/update` | POST | ✅ AJAX |
+| Payroll | Danh sách kỳ lương | `/payroll` | GET | ❌ |
+| Payroll | Tạo kỳ lương | `/payroll/store-period` | POST | ❌ |
+| Payroll | Tính lương | `/payroll/calculate` | POST | ❌ |
+| Payroll | Công bố lương | `/payroll/publish` | POST | ❌ |
+| Payroll | Xem phiếu lương | `/payroll/view` | GET | ❌ |
+| Schedule | Tạo kỳ lịch | `/schedule/store-period` | POST | ❌ |
+| Schedule | Mở đăng ký | `/schedule/open-registration` | POST | ❌ |
+| Schedule | Đăng ký ca (NV) | `/schedule/register-slot` | POST | ❌ |
+| Schedule | Phân ca (Admin) | `/schedule/assign` | POST | ❌ |
+| Schedule | Gỡ phân ca | `/schedule/remove-assignment` | POST | ❌ |
+| Schedule | Publish lịch | `/schedule/publish` | POST | ❌ |
+| Tickets | Tạo khiếu nại | `/tickets/store` | POST | ❌ |
+| Tickets | Xem chi tiết | `/tickets/view` | GET | ❌ |
+| Tickets | Cập nhật trạng thái (Admin) | `/tickets/update-status` | POST | ❌ |

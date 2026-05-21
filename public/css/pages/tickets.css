@@ -1,0 +1,61 @@
+/* ============================================================
+ * tickets.css — Hệ thống khiếu nại
+ * ============================================================ */
+
+/* Action button group */
+.action-btns {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-wrap: wrap;
+}
+
+/* Ticket view detail */
+.ticket-detail-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 20px;
+}
+@media (max-width: 640px) {
+    .ticket-detail-grid { grid-template-columns: 1fr; }
+}
+
+.ticket-detail-row {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding: 10px;
+    background: rgba(255, 255, 255, 0.5);
+    border-radius: var(--radius);
+    border: 1px solid var(--border);
+}
+.ticket-detail-label {
+    font-size: 0.78rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--text-muted);
+}
+.ticket-detail-value {
+    font-size: 0.92rem;
+    font-weight: 600;
+    color: var(--text);
+}
+
+/* Ticket description block */
+.ticket-desc {
+    padding: 16px;
+    background: rgba(255, 255, 255, 0.5);
+    border-radius: var(--radius);
+    border: 1px solid var(--border);
+    font-size: 0.92rem;
+    line-height: 1.7;
+    white-space: pre-wrap;
+}
+
+/* Create/CTA button */
+.btn-full {
+    width: 100%;
+    box-sizing: border-box;
+}

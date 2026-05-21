@@ -1,0 +1,85 @@
+/* ============================================================
+ * payroll.css — Bảng lương
+ * ============================================================ */
+
+/* Action button group */
+.action-btns {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-wrap: wrap;
+}
+
+/* Payslip view layout */
+.payslip-header {
+    text-align: center;
+    margin-bottom: 32px;
+}
+.payslip-header h1 {
+    font-size: 1.6rem;
+    font-weight: 800;
+    margin-bottom: 4px;
+}
+.payslip-header p {
+    color: var(--text-muted);
+    font-size: 0.9rem;
+}
+
+.payslip-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 24px;
+}
+@media (max-width: 640px) {
+    .payslip-grid { grid-template-columns: 1fr; }
+}
+
+.payslip-section-title {
+    font-weight: 700;
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--text-muted);
+    margin-bottom: 12px;
+    padding-bottom: 6px;
+    border-bottom: 2px solid var(--border);
+}
+
+.payslip-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 8px 0;
+    border-bottom: 1px dashed var(--border);
+    font-size: 0.9rem;
+}
+.payslip-row:last-child {
+    border-bottom: none;
+}
+.payslip-row.total {
+    font-weight: 700;
+    font-size: 1rem;
+    border-top: 2px solid var(--border);
+    border-bottom: none;
+    margin-top: 8px;
+    padding-top: 12px;
+    color: var(--primary);
+}
+.payslip-net {
+    background: var(--primary-gradient);
+    color: #fff;
+    border-radius: var(--radius-lg);
+    padding: 20px 24px;
+    text-align: center;
+    margin-top: 24px;
+}
+.payslip-net .label {
+    font-size: 0.85rem;
+    opacity: 0.85;
+    margin-bottom: 4px;
+}
+.payslip-net .amount {
+    font-size: 2rem;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+}

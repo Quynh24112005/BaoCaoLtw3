@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@400&amp;family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-tertiary-fixed": "#2c1600",
+                        "secondary-container": "#3a4a5f",
+                        "surface-variant": "#2d3449",
+                        "on-primary": "#00344d",
+                        "on-secondary": "#213145",
+                        "on-secondary-fixed-variant": "#38485d",
+                        "surface-container": "#171f33",
+                        "surface-container-lowest": "#060e20",
+                        "on-surface-variant": "#bec8d2",
+                        "surface": "#0b1326",
+                        "inverse-on-surface": "#283044",
+                        "primary-fixed-dim": "#89ceff",
+                        "inverse-primary": "#006591",
+                        "error": "#ffb4ab",
+                        "on-secondary-fixed": "#0b1c30",
+                        "on-primary-fixed": "#001e2f",
+                        "primary": "#89ceff",
+                        "on-background": "#dae2fd",
+                        "background": "#0b1326",
+                        "outline-variant": "#3e4850",
+                        "error-container": "#93000a",
+                        "surface-container-highest": "#2d3449",
+                        "on-tertiary": "#492900",
+                        "inverse-surface": "#dae2fd",
+                        "surface-container-low": "#131b2e",
+                        "on-error": "#690005",
+                        "secondary-fixed": "#d3e4fe",
+                        "primary-fixed": "#c9e6ff",
+                        "on-error-container": "#ffdad6",
+                        "surface-tint": "#89ceff",
+                        "tertiary-container": "#de8712",
+                        "tertiary-fixed": "#ffdcbd",
+                        "primary-container": "#0ea5e9",
+                        "outline": "#88929b",
+                        "on-primary-container": "#003751",
+                        "surface-bright": "#31394d",
+                        "on-primary-fixed-variant": "#004c6e",
+                        "on-tertiary-container": "#4d2b00",
+                        "on-surface": "#dae2fd",
+                        "on-tertiary-fixed-variant": "#693c00",
+                        "surface-container-high": "#222a3d",
+                        "secondary-fixed-dim": "#b7c8e1",
+                        "tertiary": "#ffb86e",
+                        "tertiary-fixed-dim": "#ffb86e",
+                        "surface-dim": "#0b1326",
+                        "on-secondary-container": "#a9bad3",
+                        "secondary": "#b7c8e1"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    "spacing": {
+                        "md": "16px",
+                        "sidebar-width": "260px",
+                        "lg": "24px",
+                        "2xl": "48px",
+                        "unit": "4px",
+                        "margin-mobile": "16px",
+                        "xl": "32px",
+                        "gutter": "24px",
+                        "xs": "4px",
+                        "margin-desktop": "32px",
+                        "sm": "8px"
+                    },
+                    "fontFamily": {
+                        "body-md": ["Inter"],
+                        "label-md": ["Inter"],
+                        "headline-md": ["Inter"],
+                        "mono-sm": ["JetBrains Mono"],
+                        "headline-lg": ["Inter"],
+                        "body-lg": ["Inter"],
+                        "title-lg": ["Inter"],
+                        "display-lg": ["Inter"]
+                    },
+                    "fontSize": {
+                        "body-md": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                        "label-md": ["12px", {"lineHeight": "16px", "letterSpacing": "0.01em", "fontWeight": "500"}],
+                        "headline-md": ["24px", {"lineHeight": "32px", "fontWeight": "600"}],
+                        "mono-sm": ["12px", {"lineHeight": "16px", "fontWeight": "400"}],
+                        "headline-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+                        "body-lg": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                        "title-lg": ["18px", {"lineHeight": "28px", "fontWeight": "600"}],
+                        "display-lg": ["48px", {"lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "700"}]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            display: inline-block;
+            line-height: 1;
+            text-transform: none;
+            letter-spacing: normal;
+            word-wrap: normal;
+            white-space: nowrap;
+            direction: ltr;
+        }
+        body {
+            background-color: #0b1326;
+            color: #dae2fd;
+        }
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0b1326;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #1e293b;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #3e4850;
+        }
+    </style>
+</head>
+<body class="font-body-md text-body-md">
+<!-- Sidebar Navigation Rail -->
+<aside class="fixed left-0 top-0 h-full w-sidebar-width bg-surface border-r border-outline-variant flex flex-col py-lg z-50">
+<div class="px-lg mb-xl">
+<h1 class="font-headline-md text-headline-md font-semibold text-primary">HR Core</h1>
+<p class="font-label-md text-label-md text-on-surface-variant">Admin Console</p>
+</div>
+<nav class="flex-1 space-y-unit">
+<a class="flex items-center text-on-surface-variant font-medium pl-lg hover:bg-surface-container transition-colors py-sm group" href="#">
+<span class="material-symbols-outlined mr-md group-hover:text-primary">dashboard</span>
+<span>Dashboard</span>
+</a>
+<a class="flex items-center text-primary font-bold border-l-4 border-primary pl-md bg-surface-container-high py-sm" href="#">
+<span class="material-symbols-outlined mr-md">group</span>
+<span>Employees</span>
+</a>
+<a class="flex items-center text-on-surface-variant font-medium pl-lg hover:bg-surface-container transition-colors py-sm group" href="#">
+<span class="material-symbols-outlined mr-md group-hover:text-primary">calendar_today</span>
+<span>Schedule</span>
+</a>
+<a class="flex items-center text-on-surface-variant font-medium pl-lg hover:bg-surface-container transition-colors py-sm group" href="#">
+<span class="material-symbols-outlined mr-md group-hover:text-primary">how_to_reg</span>
+<span>Attendance</span>
+</a>
+<a class="flex items-center text-on-surface-variant font-medium pl-lg hover:bg-surface-container transition-colors py-sm group" href="#">
+<span class="material-symbols-outlined mr-md group-hover:text-primary">event_busy</span>
+<span>Leave</span>
+</a>
+<a class="flex items-center text-on-surface-variant font-medium pl-lg hover:bg-surface-container transition-colors py-sm group" href="#">
+<span class="material-symbols-outlined mr-md group-hover:text-primary">payments</span>
+<span>Payroll</span>
+</a>
+<a class="flex items-center text-on-surface-variant font-medium pl-lg hover:bg-surface-container transition-colors py-sm group" href="#">
+<span class="material-symbols-outlined mr-md group-hover:text-primary">confirmation_number</span>
+<span>Tickets</span>
+</a>
+</nav>
+<div class="px-lg mt-auto pt-lg border-t border-outline-variant">
+<div class="flex items-center gap-md">
+<img alt="Admin" class="w-10 h-10 rounded-full border border-primary" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCcx4GxuO-HRIaCndOL6UXuZjcfyf-KmP48o9ustLbZxc9NRqslNON2asfEUfb_Rqg3HE479HbITA8UYlJa7IFvetwQrVHPIk1uFxUsaIDBHDG1QDo9eJdnLdQG8NdsoUNTBQbxDCY8DS6yqnsyYJdxtNrPQvgV-rwUcdv4VrPcGhmI2vuE8xRr0lxAw3SqVZp4ZZey0JkIE9uqgaw22gQnw8UKzwdLUOrhAKKHRUwLVUX-h_Xx5nOQzZjbVGLMVjhFp5nfj4Yg4hsW"/>
+<div>
+<p class="font-label-md text-label-md font-bold text-on-surface">Alex Rivera</p>
+<p class="text-[10px] text-on-surface-variant uppercase tracking-wider">Super Admin</p>
+</div>
+</div>
+</div>
+</aside>
+<!-- Top Navigation Bar -->
+<header class="fixed top-0 right-0 w-[calc(100%-260px)] h-16 bg-surface/80 backdrop-blur-md flex justify-between items-center px-lg z-40 border-b border-outline-variant">
+<div class="flex items-center flex-1 max-w-xl">
+<div class="relative w-full group focus-within:ring-2 focus-within:ring-primary rounded-lg transition-all">
+<span class="material-symbols-outlined absolute left-md top-1/2 -translate-y-1/2 text-on-surface-variant">search</span>
+<input class="w-full bg-surface-container-lowest border-none rounded-lg pl-10 py-sm text-body-md focus:ring-0 placeholder:text-on-surface-variant" placeholder="Search employees, roles, or departments..." type="text"/>
+</div>
+</div>
+<div class="flex items-center gap-lg">
+<button class="text-on-surface-variant hover:text-primary transition-colors relative">
+<span class="material-symbols-outlined">notifications</span>
+<span class="absolute top-0 right-0 w-2 h-2 bg-error rounded-full animate-pulse"></span>
+</button>
+<button class="text-on-surface-variant hover:text-primary transition-colors">
+<span class="material-symbols-outlined">settings</span>
+</button>
+<button class="bg-primary text-on-primary px-md py-sm rounded-lg font-label-md text-label-md hover:opacity-90 transition-opacity">
+                Sign Out
+            </button>
+</div>
+</header>
+<!-- Main Content Area -->
+<main class="ml-sidebar-width pt-24 px-lg pb-xl min-h-screen">
+<!-- Header Section -->
+<div class="flex flex-col md:flex-row md:items-end justify-between mb-xl gap-lg">
+<div>
+<h2 class="font-display-lg text-display-lg text-on-surface mb-xs">Employee List</h2>
+<p class="text-on-surface-variant font-body-lg text-body-lg">Manage organizational hierarchy and personnel data.</p>
+</div>
+<button class="bg-primary-container text-on-primary-container px-xl py-md rounded-xl font-title-lg text-title-lg flex items-center gap-sm hover:brightness-110 transition-all shadow-lg">
+<span class="material-symbols-outlined">person_add</span>
+                Add New Employee
+            </button>
+</div>
+<!-- Dashboard Stats Grid -->
+<div class="grid grid-cols-1 md:grid-cols-4 gap-gutter mb-xl">
+<div class="bg-surface-container p-lg rounded-xl border border-outline-variant">
+<div class="flex justify-between items-start mb-md">
+<span class="p-sm bg-primary/10 rounded-lg text-primary material-symbols-outlined">groups</span>
+<span class="text-tertiary font-label-md text-label-md">+4.2%</span>
+</div>
+<p class="text-on-surface-variant font-label-md text-label-md uppercase tracking-widest">Total Staff</p>
+<h3 class="font-headline-md text-headline-md text-on-surface">1,248</h3>
+</div>
+<div class="bg-surface-container p-lg rounded-xl border border-outline-variant">
+<div class="flex justify-between items-start mb-md">
+<span class="p-sm bg-tertiary-container/10 rounded-lg text-tertiary material-symbols-outlined">badge</span>
+<span class="text-primary font-label-md text-label-md">Active</span>
+</div>
+<p class="text-on-surface-variant font-label-md text-label-md uppercase tracking-widest">Departments</p>
+<h3 class="font-headline-md text-headline-md text-on-surface">24</h3>
+</div>
+<div class="bg-surface-container p-lg rounded-xl border border-outline-variant">
+<div class="flex justify-between items-start mb-md">
+<span class="p-sm bg-error-container/10 rounded-lg text-error material-symbols-outlined">event_busy</span>
+<span class="text-error font-label-md text-label-md">12 Today</span>
+</div>
+<p class="text-on-surface-variant font-label-md text-label-md uppercase tracking-widest">On Leave</p>
+<h3 class="font-headline-md text-headline-md text-on-surface">45</h3>
+</div>
+<div class="bg-surface-container p-lg rounded-xl border border-outline-variant">
+<div class="flex justify-between items-start mb-md">
+<span class="p-sm bg-primary-container/10 rounded-lg text-on-primary-container material-symbols-outlined">history</span>
+<span class="text-on-surface-variant font-label-md text-label-md">This Month</span>
+</div>
+<p class="text-on-surface-variant font-label-md text-label-md uppercase tracking-widest">New Hires</p>
+<h3 class="font-headline-md text-headline-md text-on-surface">18</h3>
+</div>
+</div>
+<!-- Filters Section -->
+<div class="bg-surface-container-low p-md rounded-xl mb-lg flex flex-wrap gap-md items-center border border-outline-variant/30">
+<div class="flex items-center gap-xs text-on-surface-variant">
+<span class="material-symbols-outlined text-[20px]">filter_list</span>
+<span class="font-label-md text-label-md">Filter by:</span>
+</div>
+<select class="bg-surface-container-highest border-outline-variant text-on-surface rounded-lg py-xs px-md font-label-md text-label-md focus:ring-primary focus:border-primary">
+<option>All Departments</option>
+<option>Engineering</option>
+<option>Human Resources</option>
+<option>Design</option>
+<option>Marketing</option>
+</select>
+<select class="bg-surface-container-highest border-outline-variant text-on-surface rounded-lg py-xs px-md font-label-md text-label-md focus:ring-primary focus:border-primary">
+<option>Role: All</option>
+<option>Admin</option>
+<option>Employee</option>
+<option>Manager</option>
+</select>
+<select class="bg-surface-container-highest border-outline-variant text-on-surface rounded-lg py-xs px-md font-label-md text-label-md focus:ring-primary focus:border-primary">
+<option>Status: All</option>
+<option>Active</option>
+<option>Inactive</option>
+</select>
+<button class="ml-auto text-primary font-label-md text-label-md hover:underline">Clear all filters</button>
+</div>
+<!-- Data Table -->
+<div class="bg-surface rounded-xl border border-outline-variant overflow-hidden">
+<div class="overflow-x-auto">
+<table class="w-full text-left border-collapse">
+<thead>
+<tr class="bg-surface-container-high border-b border-outline-variant">
+<th class="px-lg py-md font-label-md text-label-md text-on-surface-variant uppercase tracking-wider">Employee</th>
+<th class="px-lg py-md font-label-md text-label-md text-on-surface-variant uppercase tracking-wider">Role</th>
+<th class="px-lg py-md font-label-md text-label-md text-on-surface-variant uppercase tracking-wider">Department</th>
+<th class="px-lg py-md font-label-md text-label-md text-on-surface-variant uppercase tracking-wider">Status</th>
+<th class="px-lg py-md font-label-md text-label-md text-on-surface-variant uppercase tracking-wider text-right">Actions</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-outline-variant/30">
+<!-- Row 1 -->
+<tr class="hover:bg-surface-container-high transition-colors group">
+<td class="px-lg py-md">
+<div class="flex items-center gap-md">
+<img class="w-10 h-10 rounded-full object-cover grayscale group-hover:grayscale-0 transition-all duration-300" data-alt="A professional headshot of a young male employee in a dark navy suit against a clean, neutral grey studio background. The lighting is soft and cinematic, highlighting his friendly expression. The aesthetic is corporate and modern, matching a high-end HR dashboard interface." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCnQNwooi413gr40E6QvgnJrwXmYRVZdYWCBz72X0rsqOgR9TBdiH96tQuCXCPls8xiDhHAkMkqjV5ExUaAb-l4LO8_57OCZSbsNbtHUi-HsMvBu37swt56zSmEOwmSlL6kJ6ry4JNTLZfUJklTPWPhjtf1wpVKACf4fFJvZ1C09EJSWEwx3sM760HByDZ9AM_7I2_ztY6cqOKek7PgFfe7fa2cmNo3qIDxfIEbpQ6BhsB2QSZ70SbbqJCYebM0rCY6ASd7M7Zh0dac"/>
+<div>
+<p class="font-title-lg text-title-lg text-on-surface">Jordan Sinclair</p>
+<p class="text-on-surface-variant font-label-md text-label-md">jordan.s@hrcore.tech</p>
+</div>
+</div>
+</td>
+<td class="px-lg py-md">
+<span class="bg-primary-container/20 text-primary border border-primary/30 px-sm py-xs rounded-full font-label-md text-label-md">Admin</span>
+</td>
+<td class="px-lg py-md">
+<p class="text-on-surface">Engineering</p>
+<p class="text-on-surface-variant font-label-md text-label-md">Full Stack Developer</p>
+</td>
+<td class="px-lg py-md">
+<div class="flex items-center gap-xs">
+<span class="w-2 h-2 rounded-full bg-tertiary"></span>
+<span class="text-on-surface font-body-md text-body-md">Active</span>
+</div>
+</td>
+<td class="px-lg py-md text-right">
+<div class="flex justify-end gap-sm">
+<button class="p-xs text-on-surface-variant hover:text-primary hover:bg-surface-container rounded-lg transition-all">
+<span class="material-symbols-outlined">edit</span>
+</button>
+<button class="p-xs text-on-surface-variant hover:text-error hover:bg-error/10 rounded-lg transition-all">
+<span class="material-symbols-outlined">delete</span>
+</button>
+</div>
+</td>
+</tr>
+<!-- Row 2 -->
+<tr class="hover:bg-surface-container-high transition-colors group">
+<td class="px-lg py-md">
+<div class="flex items-center gap-md">
+<img class="w-10 h-10 rounded-full object-cover grayscale group-hover:grayscale-0 transition-all duration-300" data-alt="Close up portrait of a confident female executive with a warm smile. She is in a blurred office environment with cool blue and charcoal tones. The image has a professional, high-resolution commercial look with sharp focus and elegant studio lighting." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAOrEEdS9bMa4SH9ttOkMJOLE7NGGrDaFyGWkmWmbqIzB89kcIx4O4k4NrmvD2UiRWm42pfpwKAaq5utfdCcgzOUw-fS7oRB1zMHh0Nmol1forXU-vXDTKMIoTCoaH_hDPqyA7ew7k6kLcmWkUUv-fjQvC3ucjGAKX4wDMqRtyaavV_IjOlBK12y9UWJ3NzxWyHhvfH_v7FKUycOyqnbq_yxVbBmxNHyhsF5mTjMt9KwRL6GOKNQncdCgT7_rlrf4IeMpD2V8TaVlRo"/>
+<div>
+<p class="font-title-lg text-title-lg text-on-surface">Sarah Chen</p>
+<p class="text-on-surface-variant font-label-md text-label-md">s.chen@hrcore.tech</p>
+</div>
+</div>
+</td>
+<td class="px-lg py-md">
+<span class="bg-secondary-container/20 text-secondary border border-secondary/30 px-sm py-xs rounded-full font-label-md text-label-md">Employee</span>
+</td>
+<td class="px-lg py-md">
+<p class="text-on-surface">Design</p>
+<p class="text-on-surface-variant font-label-md text-label-md">Senior UX Lead</p>
+</td>
+<td class="px-lg py-md">
+<div class="flex items-center gap-xs">
+<span class="w-2 h-2 rounded-full bg-tertiary"></span>
+<span class="text-on-surface font-body-md text-body-md">Active</span>
+</div>
+</td>
+<td class="px-lg py-md text-right">
+<div class="flex justify-end gap-sm">
+<button class="p-xs text-on-surface-variant hover:text-primary hover:bg-surface-container rounded-lg transition-all">
+<span class="material-symbols-outlined">edit</span>
+</button>
+<button class="p-xs text-on-surface-variant hover:text-error hover:bg-error/10 rounded-lg transition-all">
+<span class="material-symbols-outlined">delete</span>
+</button>
+</div>
+</td>
+</tr>
+<!-- Row 3 -->
+<tr class="hover:bg-surface-container-high transition-colors group">
+<td class="px-lg py-md">
+<div class="flex items-center gap-md">
+<img class="w-10 h-10 rounded-full object-cover grayscale group-hover:grayscale-0 transition-all duration-300" data-alt="Portrait of a male employee wearing glasses and a minimalist sweater, set against a dark architectural background. High-contrast lighting creates a sleek, technological feel suitable for an IT or development professional. The overall color scheme is muted blacks and deep blues." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCM7LAGjw85BM5nLii4g5VRZmndal-Rwp8JJw6jLKn2OW8hR2ufNecuhaKeb331bFDOAHpOa2nh37EsDsbZEtLZK2cpbu22ZN1nsicWHb_4sU1Cj1yAyMzlssDzk9dhjjMN59JXZXKrVeBRuKMeD7QzpKsYY62EBP9zzMhqJGgx6SRUucd8Yr_fEzRZfqo10TXt50BNxCOTjxIvTmBQRVXN9HMJIBPKaiU3Dyu9dhLjoKjPoFC4RFZ8h-p3mK3PSg5v5DSRbzUqNyL1"/>
+<div>
+<p class="font-title-lg text-title-lg text-on-surface">Marcus Thorne</p>
+<p class="text-on-surface-variant font-label-md text-label-md">m.thorne@hrcore.tech</p>
+</div>
+</div>
+</td>
+<td class="px-lg py-md">
+<span class="bg-secondary-container/20 text-secondary border border-secondary/30 px-sm py-xs rounded-full font-label-md text-label-md">Employee</span>
+</td>
+<td class="px-lg py-md">
+<p class="text-on-surface">Marketing</p>
+<p class="text-on-surface-variant font-label-md text-label-md">Growth Analyst</p>
+</td>
+<td class="px-lg py-md">
+<div class="flex items-center gap-xs">
+<span class="w-2 h-2 rounded-full bg-outline"></span>
+<span class="text-on-surface-variant font-body-md text-body-md">Inactive</span>
+</div>
+</td>
+<td class="px-lg py-md text-right">
+<div class="flex justify-end gap-sm">
+<button class="p-xs text-on-surface-variant hover:text-primary hover:bg-surface-container rounded-lg transition-all">
+<span class="material-symbols-outlined">edit</span>
+</button>
+<button class="p-xs text-on-surface-variant hover:text-error hover:bg-error/10 rounded-lg transition-all">
+<span class="material-symbols-outlined">delete</span>
+</button>
+</div>
+</td>
+</tr>
+<!-- Row 4 -->
+<tr class="hover:bg-surface-container-high transition-colors group">
+<td class="px-lg py-md">
+<div class="flex items-center gap-md">
+<img class="w-10 h-10 rounded-full object-cover grayscale group-hover:grayscale-0 transition-all duration-300" data-alt="Professional profile photo of a woman in corporate attire, positioned in a high-tech office with glowing blue light reflections. The image emphasizes a sense of expertise and calm authority, rendered in a sharp, cinematic style with a low-key lighting approach." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCAjMoSsQQ0J1vB3M_H3fzMLX1G4jcrTEEB1e2Ldj3CHXJa4k6FwTe-90nUNxmLFs0-XQJ4VeMRtEEeehc1Uucjnj877Px4GYon-THkC82CFbq9uMam7iCAXB7df2gGl-lRV9sWn3z8yYuGJmk_zjuPfBH2P5vfXGLIUavOhqoDowYESbHXcAqTR8kWtTKwFzHJBiJuIhKDXPQJiYkM-RT_BN6gDzLOfRCoMyi9dFdU7DrsuXUP0_mxRv1F_S5ixewcTi7is1zzaqbC"/>
+<div>
+<p class="font-title-lg text-title-lg text-on-surface">Leila Varma</p>
+<p class="text-on-surface-variant font-label-md text-label-md">l.varma@hrcore.tech</p>
+</div>
+</div>
+</td>
+<td class="px-lg py-md">
+<span class="bg-primary-container/20 text-primary border border-primary/30 px-sm py-xs rounded-full font-label-md text-label-md">Admin</span>
+</td>
+<td class="px-lg py-md">
+<p class="text-on-surface">Human Resources</p>
+<p class="text-on-surface-variant font-label-md text-label-md">HR Director</p>
+</td>
+<td class="px-lg py-md">
+<div class="flex items-center gap-xs">
+<span class="w-2 h-2 rounded-full bg-tertiary"></span>
+<span class="text-on-surface font-body-md text-body-md">Active</span>
+</div>
+</td>
+<td class="px-lg py-md text-right">
+<div class="flex justify-end gap-sm">
+<button class="p-xs text-on-surface-variant hover:text-primary hover:bg-surface-container rounded-lg transition-all">
+<span class="material-symbols-outlined">edit</span>
+</button>
+<button class="p-xs text-on-surface-variant hover:text-error hover:bg-error/10 rounded-lg transition-all">
+<span class="material-symbols-outlined">delete</span>
+</button>
+</div>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<!-- Pagination -->
+<div class="bg-surface-container-low px-lg py-md flex items-center justify-between border-t border-outline-variant">
+<p class="font-label-md text-label-md text-on-surface-variant">Showing 1 to 4 of 1,248 entries</p>
+<div class="flex gap-xs">
+<button class="p-sm rounded border border-outline-variant hover:bg-surface-container-highest transition-colors disabled:opacity-50" disabled="">
+<span class="material-symbols-outlined text-[18px]">chevron_left</span>
+</button>
+<button class="w-8 h-8 flex items-center justify-center rounded bg-primary text-on-primary font-label-md text-label-md">1</button>
+<button class="w-8 h-8 flex items-center justify-center rounded border border-outline-variant hover:bg-surface-container-highest text-on-surface font-label-md text-label-md">2</button>
+<button class="w-8 h-8 flex items-center justify-center rounded border border-outline-variant hover:bg-surface-container-highest text-on-surface font-label-md text-label-md">3</button>
+<span class="px-sm text-on-surface-variant">...</span>
+<button class="w-8 h-8 flex items-center justify-center rounded border border-outline-variant hover:bg-surface-container-highest text-on-surface font-label-md text-label-md">125</button>
+<button class="p-sm rounded border border-outline-variant hover:bg-surface-container-highest transition-colors">
+<span class="material-symbols-outlined text-[18px]">chevron_right</span>
+</button>
+</div>
+</div>
+</div>
+</main>
+<!-- Micro-interactions Script -->
+<script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Pulse effect for notifications
+            const notifyBadge = document.querySelector('.animate-pulse');
+            if (notifyBadge) {
+                setInterval(() => {
+                    notifyBadge.classList.toggle('scale-125');
+                }, 1000);
+            }
+
+            // Simple search focus effect
+            const searchInput = document.querySelector('input[type="text"]');
+            const searchWrapper = searchInput?.parentElement;
+            
+            searchInput?.addEventListener('focus', () => {
+                searchWrapper.classList.add('bg-surface-container-high');
+            });
+            
+            searchInput?.addEventListener('blur', () => {
+                searchWrapper.classList.remove('bg-surface-container-high');
+            });
+
+            // Table row hover effect enhancements
+            const rows = document.querySelectorAll('tbody tr');
+            rows.forEach(row => {
+                row.addEventListener('mouseenter', () => {
+                    row.style.cursor = 'pointer';
+                });
+            });
+        });
+    </script>
+</body></html>

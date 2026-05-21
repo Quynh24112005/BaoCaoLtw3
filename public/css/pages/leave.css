@@ -1,0 +1,44 @@
+/* ============================================================
+ * leave.css — Quản lý nghỉ phép
+ * ============================================================ */
+
+/* Leave create form */
+.leave-form-card {
+    max-width: 640px;
+    margin: 0 auto;
+}
+
+/* Filter tabs (filter-bar is already in app.css, extras here) */
+.filter-bar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-bottom: 20px;
+}
+.filter-btn {
+    padding: 8px 16px;
+    border-radius: 99px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--text-muted);
+    text-decoration: none;
+    border: 1px solid var(--border);
+    background: rgba(255, 255, 255, 0.6);
+    transition: all 0.2s;
+}
+.filter-btn:hover,
+.filter-btn.active {
+    background: var(--primary-gradient);
+    color: #fff;
+    border-color: transparent;
+    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.2);
+}
+
+/* Action button group in leave table */
+.action-btns {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-wrap: wrap;
+}

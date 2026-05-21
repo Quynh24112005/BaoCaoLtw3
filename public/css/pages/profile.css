@@ -1,0 +1,48 @@
+/* ============================================================
+ * profile.css — Hồ sơ cá nhân
+ * ============================================================ */
+
+/* Profile avatar */
+.profile-avatar {
+    width: 88px;
+    height: 88px;
+    border-radius: 50%;
+    background: var(--primary-gradient);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2.2rem;
+    font-weight: 800;
+    margin: 0 auto 16px;
+    box-shadow: 0 8px 24px rgba(99, 102, 241, 0.25);
+}
+
+/* Profile info table */
+.profile-info-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+.profile-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--border);
+    font-size: 0.92rem;
+}
+.profile-row:last-child {
+    border-bottom: none;
+}
+.profile-key {
+    font-weight: 600;
+    color: var(--text-muted);
+    min-width: 130px;
+}
+
+/* Edit button (full width pill) */
+.btn-full {
+    width: 100%;
+    box-sizing: border-box;
+}

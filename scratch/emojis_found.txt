@@ -1,0 +1,277 @@
+Found 92 lines with emojis:
+File: app/views/ai/burnout.php
+Line 3: ['🔥'] -> <div><h1 class="page-title">🔥 Burnout Prediction</h1>
+--------------------------------------------------
+File: app/views/ai/burnout.php
+Line 8: ['⚠'] -> <div class="alert alert-danger">⚠ <?= htmlspecialchars($output['error']) ?></div>
+--------------------------------------------------
+File: app/views/ai/burnout.php
+Line 33: ['📊'] -> <div class="card-header"><h2 class="card-title">📊 Dữ liệu đầu vào (đã ẩn PII)</h2></div>
+--------------------------------------------------
+File: app/views/ai/index.php
+Line 4: ['🤖'] -> <h1 class="page-title">🤖 AI Dashboard</h1>
+--------------------------------------------------
+File: app/views/ai/index.php
+Line 12: ['🔥'] -> <div class="ai-module-icon">🔥</div>
+--------------------------------------------------
+File: app/views/ai/index.php
+Line 18: ['🚀'] -> <a href="<?= BASE_URL ?>/ai/burnout" class="btn btn-primary btn-full">🚀 Chạy phân tích</a>
+--------------------------------------------------
+File: app/views/ai/index.php
+Line 23: ['📅'] -> <div class="ai-module-icon">📅</div>
+--------------------------------------------------
+File: app/views/ai/index.php
+Line 29: ['🚀'] -> <a href="<?= BASE_URL ?>/ai/scheduler" class="btn btn-primary btn-full">🚀 Tạo đề xuất</a>
+--------------------------------------------------
+File: app/views/ai/index.php
+Line 34: ['📊'] -> <div class="ai-module-icon">📊</div>
+--------------------------------------------------
+File: app/views/ai/index.php
+Line 40: ['🚀'] -> <a href="<?= BASE_URL ?>/ai/weekly-report" class="btn btn-primary btn-full">🚀 Tạo báo cáo</a>
+--------------------------------------------------
+File: app/views/ai/index.php
+Line 45: ['⚠'] -> <strong>⚠ Lưu ý:</strong> AI chỉ đóng vai trò tư vấn và gợi ý.
+--------------------------------------------------
+File: app/views/ai/scheduler.php
+Line 3: ['📅'] -> <div><h1 class="page-title">📅 Smart Scheduler</h1>
+--------------------------------------------------
+File: app/views/ai/scheduler.php
+Line 7: ['⚠'] -> <div class="alert alert-danger">⚠ <?= htmlspecialchars($output['error']) ?></div>
+--------------------------------------------------
+File: app/views/ai/scheduler.php
+Line 10: ['🤖'] -> <div class="card-header"><h2 class="card-title">🤖 Đề xuất từ AI</h2></div>
+--------------------------------------------------
+File: app/views/ai/scheduler.php
+Line 14: ['⚠'] -> <strong>⚠ Cảnh báo:</strong>
+--------------------------------------------------
+File: app/views/ai/weekly_report.php
+Line 3: ['📊'] -> <div><h1 class="page-title">📊 Báo cáo tuần AI</h1>
+--------------------------------------------------
+File: app/views/ai/weekly_report.php
+Line 8: ['👥'] -> <div class="stat-card stat-blue"><div class="stat-icon">👥</div><div class="stat-body"><div class="stat-value"><?= $summary['total_employees'] ?></div><div class="stat-label">Nhân viên</div></div></div>
+--------------------------------------------------
+File: app/views/ai/weekly_report.php
+Line 9: ['⏱'] -> <div class="stat-card stat-green"><div class="stat-icon">⏱</div><div class="stat-body"><div class="stat-value"><?= round($summary['total_hours'],1) ?></div><div class="stat-label">Tổng giờ làm</div></div></div>
+--------------------------------------------------
+File: app/views/ai/weekly_report.php
+Line 10: ['🚀'] -> <div class="stat-card stat-orange"><div class="stat-icon">🚀</div><div class="stat-body"><div class="stat-value"><?= round($summary['total_overtime'],1) ?></div><div class="stat-label">Giờ tăng ca</div></div></div>
+--------------------------------------------------
+File: app/views/ai/weekly_report.php
+Line 11: ['🌴'] -> <div class="stat-card stat-red"><div class="stat-icon">🌴</div><div class="stat-body"><div class="stat-value"><?= $summary['pending_leaves'] ?></div><div class="stat-label">Đơn nghỉ chờ</div></div></div>
+--------------------------------------------------
+File: app/views/ai/weekly_report.php
+Line 14: ['⚠'] -> <div class="alert alert-danger">⚠ <?= htmlspecialchars($output['error']) ?></div>
+--------------------------------------------------
+File: app/views/ai/weekly_report.php
+Line 17: ['🤖'] -> <div class="card-header"><h2 class="card-title">🤖 Nhận xét & Gợi ý từ AI</h2></div>
+--------------------------------------------------
+File: app/views/attendance/index.php
+Line 3: ['⏱'] -> <div><h1 class="page-title">⏱️ Bảng chấm công</h1></div>
+--------------------------------------------------
+File: app/views/attendance/index.php
+Line 25: ['🔍'] -> <button type="submit" class="btn btn-primary">🔍 Lọc</button>
+--------------------------------------------------
+File: app/views/attendance/index.php
+Line 60: ['✏'] -> <button class="btn btn-sm btn-ghost" onclick="openEditModal(<?= htmlspecialchars(json_encode($row)) ?>)">✏️</button>
+--------------------------------------------------
+File: app/views/attendance/index.php
+Line 76: ['✏'] -> <h3>✏️ Chỉnh sửa chấm công</h3>
+--------------------------------------------------
+File: app/views/attendance/index.php
+Line 104: ['💾'] -> <button type="submit" class="btn btn-primary">💾 Lưu</button>
+--------------------------------------------------
+File: app/views/audit/index.php
+Line 3: ['📋'] -> <div><h1 class="page-title">📋 Nhật ký hệ thống</h1>
+--------------------------------------------------
+File: app/views/auth/login.php
+Line 4: ['⚡'] -> <span class="logo-icon-lg">⚡</span>
+--------------------------------------------------
+File: app/views/auth/login.php
+Line 12: ['⚠'] -> <p>⚠ <?= htmlspecialchars($err) ?></p>
+--------------------------------------------------
+File: app/views/auth/login.php
+Line 44: ['👁'] -> <button type="button" class="btn-eye" onclick="togglePassword()" aria-label="Hiển thị mật khẩu">👁</button>
+--------------------------------------------------
+File: app/views/employees/create.php
+Line 5: ['➕'] -> <h1 class="page-title">➕ Thêm nhân viên</h1>
+--------------------------------------------------
+File: app/views/employees/create.php
+Line 12: ['⚠'] -> <?php foreach ($errors as $e): ?><p>⚠ <?= htmlspecialchars($e) ?></p><?php endforeach; ?>
+--------------------------------------------------
+File: app/views/employees/edit.php
+Line 5: ['✏'] -> <h1 class="page-title">✏️ Sửa hồ sơ nhân viên</h1>
+--------------------------------------------------
+File: app/views/employees/edit.php
+Line 12: ['⚠'] -> <?php foreach ($errors as $e): ?><p>⚠ <?= htmlspecialchars($e) ?></p><?php endforeach; ?>
+--------------------------------------------------
+File: app/views/employees/edit.php
+Line 87: ['💾'] -> <button type="submit" class="btn btn-primary">💾 Lưu thay đổi</button>
+--------------------------------------------------
+File: app/views/errors/403.php
+Line 4: ['🚫'] -> <div style="font-size:4rem">🚫</div>
+--------------------------------------------------
+File: app/views/errors/404.php
+Line 4: ['🔍'] -> <div style="font-size:4rem">🔍</div>
+--------------------------------------------------
+File: app/views/layouts/main.php
+Line 103: ['☰'] -> <button class="sidebar-toggle" onclick="toggleSidebar()" aria-label="Toggle sidebar">☰</button>
+--------------------------------------------------
+File: app/views/layouts/main.php
+Line 106: ['✓'] -> <div class="flash-msg flash-success">✓ <?= htmlspecialchars($flash) ?></div>
+--------------------------------------------------
+File: app/views/layouts/main.php
+Line 109: ['✕'] -> <div class="flash-msg flash-error">✕ <?= htmlspecialchars($flashErr) ?></div>
+--------------------------------------------------
+File: app/views/leave/create.php
+Line 3: ['🌴'] -> <div><h1 class="page-title">🌴 Tạo đơn xin nghỉ</h1>
+--------------------------------------------------
+File: app/views/leave/create.php
+Line 7: ['⚠'] -> <div class="alert alert-danger"><?php foreach ($errors as $e): ?><p>⚠ <?= htmlspecialchars($e) ?></p><?php endforeach; ?></div>
+--------------------------------------------------
+File: app/views/leave/create.php
+Line 38: ['📤'] -> <button type="submit" class="btn btn-primary">📤 Gửi đơn</button>
+--------------------------------------------------
+File: app/views/leave/index.php
+Line 4: ['🌴'] -> <h1 class="page-title">🌴 Quản lý nghỉ phép</h1>
+--------------------------------------------------
+File: app/views/leave/index.php
+Line 8: ['➕'] -> <a href="<?= BASE_URL ?>/leave/create" class="btn btn-primary">➕ Tạo đơn nghỉ</a>
+--------------------------------------------------
+File: app/views/leave/index.php
+Line 58: ['✅'] -> <button type="submit" class="btn btn-sm btn-success" onclick="return confirm('Duyệt đơn này?')">✅ Duyệt</button>
+--------------------------------------------------
+File: app/views/leave/index.php
+Line 60: ['✕'] -> <button class="btn btn-sm btn-danger" onclick="showRejectForm(<?= $leave['id'] ?>)">✕ Từ chối</button>
+--------------------------------------------------
+File: app/views/payroll/create_period.php
+Line 3: ['💰'] -> <div><h1 class="page-title">💰 Tạo kỳ lương</h1>
+--------------------------------------------------
+File: app/views/payroll/create_period.php
+Line 7: ['⚠'] -> <div class="alert alert-danger"><?php foreach ($errors as $e): ?><p>⚠ <?= htmlspecialchars($e) ?></p><?php endforeach; ?></div>
+--------------------------------------------------
+File: app/views/payroll/create_period.php
+Line 28: ['✅'] -> <button type="submit" class="btn btn-primary">✅ Tạo kỳ lương</button>
+--------------------------------------------------
+File: app/views/payroll/index.php
+Line 3: ['💰'] -> <div><h1 class="page-title">💰 Quản lý lương</h1></div>
+--------------------------------------------------
+File: app/views/payroll/index.php
+Line 5: ['➕'] -> <a href="<?= BASE_URL ?>/payroll/create-period" class="btn btn-primary">➕ Tạo kỳ lương</a>
+--------------------------------------------------
+File: app/views/payroll/index.php
+Line 33: ['👁'] -> <a href="<?= BASE_URL ?>/payroll/view?period=<?= $pp['id'] ?>" class="btn btn-sm btn-ghost">👁 Xem</a>
+--------------------------------------------------
+File: app/views/payroll/index.php
+Line 37: ['⚙'] -> <button class="btn btn-sm btn-primary" onclick="return confirm('Chạy tính lương?')">⚙ Tính lương</button>
+--------------------------------------------------
+File: app/views/payroll/index.php
+Line 42: ['✅'] -> <button class="btn btn-sm btn-success" onclick="return confirm('Publish phiếu lương?')">✅ Publish</button>
+--------------------------------------------------
+File: app/views/payroll/my_payslips.php
+Line 3: ['💰'] -> <div><h1 class="page-title">💰 Phiếu lương của tôi</h1></div>
+--------------------------------------------------
+File: app/views/payroll/my_payslips.php
+Line 21: ['👁'] -> <td><a href="<?= BASE_URL ?>/payroll/view?period=<?= $item['parent_id'] ?>" class="btn btn-sm btn-ghost">👁 Xem</a></td>
+--------------------------------------------------
+File: app/views/payroll/view_payslip.php
+Line 3: ['💰'] -> <div><h1 class="page-title">💰 Phiếu lương cá nhân</h1>
+--------------------------------------------------
+File: app/views/payroll/view_payslip.php
+Line 10: ['⚡'] -> <div class="payslip-logo">⚡ HR<span>AI</span></div>
+--------------------------------------------------
+File: app/views/payroll/view_payslip.php
+Line 23: ['💰'] -> <tr class="total"><th>💰 Thực lĩnh</th><td><?= number_format((float)$item['final_amount'], 0, ',', '.') ?> đ</td></tr>
+--------------------------------------------------
+File: app/views/payroll/view_payslip.php
+Line 43: ['✓'] -> <span class="badge badge-published">✓ Đã được công bố</span>
+--------------------------------------------------
+File: app/views/payroll/view_payslip.php
+Line 44: ['🎫'] -> <a href="<?= BASE_URL ?>/tickets/create" class="btn btn-sm btn-ghost">🎫 Khiếu nại</a>
+--------------------------------------------------
+File: app/views/payroll/view_period.php
+Line 4: ['💰'] -> <h1 class="page-title">💰 <?= htmlspecialchars($period['name']) ?></h1>
+--------------------------------------------------
+File: app/views/profile/edit.php
+Line 3: ['✏'] -> <div><h1 class="page-title">✏️ Cập nhật hồ sơ</h1>
+--------------------------------------------------
+File: app/views/profile/edit.php
+Line 7: ['⚠'] -> <div class="alert alert-danger"><?php foreach($errors as $e): ?><p>⚠ <?= htmlspecialchars($e) ?></p><?php endforeach; ?></div>
+--------------------------------------------------
+File: app/views/profile/edit.php
+Line 53: ['💾'] -> <button type="submit" class="btn btn-primary">💾 Lưu thay đổi</button>
+--------------------------------------------------
+File: app/views/profile/index.php
+Line 3: ['👤'] -> <div><h1 class="page-title">👤 Hồ sơ cá nhân</h1></div>
+--------------------------------------------------
+File: app/views/profile/index.php
+Line 4: ['✏'] -> <a href="<?= BASE_URL ?>/profile/edit" class="btn btn-primary">✏️ Chỉnh sửa</a>
+--------------------------------------------------
+File: app/views/schedule/create_period.php
+Line 3: ['📅'] -> <div><h1 class="page-title">📅 Tạo kỳ lịch mới</h1>
+--------------------------------------------------
+File: app/views/schedule/create_period.php
+Line 7: ['⚠'] -> <div class="alert alert-danger"><?php foreach ($errors as $e): ?><p>⚠ <?= htmlspecialchars($e) ?></p><?php endforeach; ?></div>
+--------------------------------------------------
+File: app/views/schedule/create_period.php
+Line 27: ['✅'] -> <button type="submit" class="btn btn-primary">✅ Tạo kỳ lịch</button>
+--------------------------------------------------
+File: app/views/schedule/index.php
+Line 5: ['📅'] -> <h1 class="page-title">📅 Lịch làm việc</h1>
+--------------------------------------------------
+File: app/views/schedule/index.php
+Line 8: ['➕'] -> <a href="<?= BASE_URL ?>/schedule/create-period" class="btn btn-primary">➕ Tạo kỳ lịch</a>
+--------------------------------------------------
+File: app/views/schedule/index.php
+Line 59: ['📬'] -> <button type="submit" class="btn btn-primary">📬 Mở đăng ký</button>
+--------------------------------------------------
+File: app/views/schedule/index.php
+Line 68: ['✅'] -> <button type="submit" class="btn btn-success" onclick="return confirm('Publish lịch chính thức?')">✅ Publish lịch</button>
+--------------------------------------------------
+File: app/views/schedule/index.php
+Line 88: ['📆'] -> <h2 class="card-title">📆 <?= date('l, d/m/Y', strtotime($date)) ?></h2>
+--------------------------------------------------
+File: app/views/schedule/index.php
+Line 97: ['🌙'] -> <?php if ($slot['is_night_shift']): ?><span class="badge-night">🌙 Đêm</span><?php endif; ?>
+--------------------------------------------------
+File: app/views/schedule/index.php
+Line 107: ['👤'] -> <span>👤 <?= htmlspecialchars($asgn['full_name']) ?></span>
+--------------------------------------------------
+File: app/views/schedule/index.php
+Line 112: ['✕'] -> <button type="submit" class="btn-icon" onclick="return confirm('Gỡ phân ca?')">✕</button>
+--------------------------------------------------
+File: app/views/schedule/index.php
+Line 159: ['✋'] -> <button type="submit" class="btn btn-sm btn-success">✋ Đăng ký</button>
+--------------------------------------------------
+File: app/views/schedule/index.php
+Line 177: ['➕'] -> <a href="<?= BASE_URL ?>/schedule/create-period" class="btn btn-primary mt-3">➕ Tạo kỳ lịch đầu tiên</a>
+--------------------------------------------------
+File: app/views/tickets/create.php
+Line 3: ['🎫'] -> <div><h1 class="page-title">🎫 Gửi khiếu nại</h1>
+--------------------------------------------------
+File: app/views/tickets/create.php
+Line 7: ['⚠'] -> <div class="alert alert-danger"><?php foreach ($errors as $e): ?><p>⚠ <?= htmlspecialchars($e) ?></p><?php endforeach; ?></div>
+--------------------------------------------------
+File: app/views/tickets/create.php
+Line 38: ['📤'] -> <button type="submit" class="btn btn-primary">📤 Gửi khiếu nại</button>
+--------------------------------------------------
+File: app/views/tickets/index.php
+Line 3: ['🎫'] -> <div><h1 class="page-title">🎫 Hệ thống khiếu nại</h1></div>
+--------------------------------------------------
+File: app/views/tickets/index.php
+Line 4: ['➕'] -> <a href="<?= BASE_URL ?>/tickets/create" class="btn btn-primary">➕ Tạo khiếu nại</a>
+--------------------------------------------------
+File: app/views/tickets/index.php
+Line 48: ['👁'] -> <a href="<?= BASE_URL ?>/tickets/view?id=<?= $ticket['id'] ?>" class="btn btn-sm btn-ghost">👁 Xem</a>
+--------------------------------------------------
+File: app/views/tickets/index.php
+Line 50: ['⚙'] -> <button class="btn btn-sm btn-primary" onclick="openStatusModal(<?= $ticket['id'] ?>)">⚙ Xử lý</button>
+--------------------------------------------------
+File: app/views/tickets/index.php
+Line 66: ['⚙'] -> <h3>⚙ Cập nhật trạng thái ticket</h3>
+--------------------------------------------------
+File: app/views/tickets/index.php
+Line 84: ['💾'] -> <button type="submit" class="btn btn-primary">💾 Cập nhật</button>
+--------------------------------------------------
+File: app/views/tickets/view.php
+Line 3: ['🎫'] -> <div><h1 class="page-title">🎫 Ticket #<?= $ticket['id'] ?></h1>
+--------------------------------------------------
