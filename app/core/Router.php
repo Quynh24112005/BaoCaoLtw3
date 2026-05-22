@@ -70,11 +70,11 @@ class Router {
         'tickets/update-status' => ['TicketController', 'updateStatus', ['ADMIN']],
 
         // AJAX Endpoints (return JSON)
-        'ajax/employees/search'        => ['EmployeeController',   'ajaxSearch',       ['ADMIN']],
-        'ajax/employees/toggle-status' => ['EmployeeController',   'ajaxToggleStatus', ['ADMIN']],
-        'ajax/leave/approve'           => ['LeaveController',      'ajaxApprove',      ['ADMIN']],
-        'ajax/leave/reject'            => ['LeaveController',      'ajaxReject',       ['ADMIN']],
-        'ajax/attendance/update'       => ['AttendanceController', 'ajaxUpdate',       ['ADMIN']],
+        'ajax/employees/search'        => ['AjaxController',       'employeeSearch',       ['ADMIN']],
+        'ajax/employees/toggle-status' => ['AjaxController',       'employeeToggleStatus', ['ADMIN']],
+        'ajax/leave/approve'           => ['AjaxController',       'leaveApprove',         ['ADMIN']],
+        'ajax/leave/reject'            => ['AjaxController',       'leaveReject',          ['ADMIN']],
+        'ajax/attendance/update'       => ['AjaxController',       'attendanceUpdate',     ['ADMIN']],
 
     ];
 
