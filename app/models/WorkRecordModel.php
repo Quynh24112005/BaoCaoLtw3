@@ -10,9 +10,7 @@ require_once APP_PATH . '/core/Model.php';
  */
 class WorkRecordModel extends Model {
 
-    // =========================================================================
     // SCHEDULE PERIOD
-    // =========================================================================
 
     public function createPeriod(array $data): int {
         $meta = json_encode([
@@ -64,9 +62,7 @@ class WorkRecordModel extends Model {
         );
     }
 
-    // =========================================================================
     // SHIFT SLOTS
-    // =========================================================================
 
     public function createSlot(array $data): int {
         return $this->execute(
@@ -123,9 +119,7 @@ class WorkRecordModel extends Model {
         );
     }
 
-    // =========================================================================
     // REGISTRATIONS
-    // =========================================================================
 
     public function createRegistration(array $data): int {
         return $this->execute(
@@ -178,9 +172,7 @@ class WorkRecordModel extends Model {
         );
     }
 
-    // =========================================================================
     // ASSIGNMENTS
-    // =========================================================================
 
     public function createAssignment(array $data): int {
         $meta = json_encode(['assigned_at' => date('Y-m-d H:i:s')]);
@@ -287,9 +279,7 @@ class WorkRecordModel extends Model {
         return $row !== null;
     }
 
-    // =========================================================================
     // ATTENDANCE
-    // =========================================================================
 
     public function upsertAttendance(array $data): void {
         $existing = $this->queryOne(

@@ -8,9 +8,7 @@ require_once APP_PATH . '/core/Model.php';
  */
 class UserModel extends Model {
 
-    // -------------------------------------------------------------------------
     // Read
-    // -------------------------------------------------------------------------
 
     public function findById(int $id): ?array {
         return $this->queryOne(
@@ -167,9 +165,7 @@ class UserModel extends Model {
         );
     }
 
-    // -------------------------------------------------------------------------
     // Write
-    // -------------------------------------------------------------------------
 
     public function create(array $data): int {
         $sql = "INSERT INTO users
@@ -254,9 +250,7 @@ class UserModel extends Model {
         );
     }
 
-    // -------------------------------------------------------------------------
     // Auth helper
-    // -------------------------------------------------------------------------
 
     public function verifyPassword(string $plainPassword, string $hash): bool {
         return password_verify($plainPassword, $hash);

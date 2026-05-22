@@ -43,6 +43,7 @@ class EmployeeController extends Controller {
             'departments' => $departments,
             'stats'       => $stats,
             'pageCSS'     => 'pages/employees.css',
+            'pageJS'      => 'pages/employees.js',
         ]);
     }
 
@@ -54,7 +55,6 @@ class EmployeeController extends Controller {
         $data   = $_POST;
         $errors = $this->validateEmployee($data);
 
-        // Check email uniqueness
         if (empty($errors) && $this->userModel->findByEmail($data['email'])) {
             $errors[] = 'Email này đã được sử dụng.';
         }

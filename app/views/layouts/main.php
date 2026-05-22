@@ -23,7 +23,7 @@
     <div class="sidebar-header">
         <div class="sidebar-logo">
             <span class="logo-icon"><i data-lucide="zap"></i></span>
-            <span class="logo-text">HR<span class="logo-accent">Core</span></span>
+            <span class="logo-text">Quản lý nhân viên</span></span>
         </div>
     </div>
 
@@ -115,5 +115,8 @@
 </main>
 
 <script src="<?= BASE_URL ?>/public/js/app.js"></script>
+<?php if (!empty($pageJS)): foreach ((array)$pageJS as $_js): ?>
+<script src="<?= BASE_URL ?>/public/js/<?= htmlspecialchars($_js) ?>"></script>
+<?php endforeach; endif; ?>
 </body>
 </html>

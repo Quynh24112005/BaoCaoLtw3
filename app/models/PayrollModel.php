@@ -1,16 +1,9 @@
 <?php
 require_once APP_PATH . '/core/Model.php';
 
-/**
- * PayrollModel - handles the `payroll_records` table
- *
- * record_type: PERIOD | ITEM
- */
 class PayrollModel extends Model {
 
-    // =========================================================================
     // PERIOD
-    // =========================================================================
 
     public function createPeriod(array $data): int {
         return $this->execute(
@@ -51,9 +44,7 @@ class PayrollModel extends Model {
         );
     }
 
-    // =========================================================================
     // PAYROLL ITEMS
-    // =========================================================================
 
     public function upsertItem(array $data): void {
         $existing = $this->queryOne(
