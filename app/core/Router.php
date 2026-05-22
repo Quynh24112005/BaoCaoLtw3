@@ -32,16 +32,6 @@ class Router {
         'employees/toggle-status'   => ['EmployeeController',   'toggleStatus', ['ADMIN']],
         'employees/delete'          => ['EmployeeController',   'delete',   ['ADMIN']],
 
-        // Schedule
-        'schedule'                          => ['ScheduleController', 'index',            null],
-        'schedule/create-period'            => ['ScheduleController', 'createPeriod',     ['ADMIN']],
-        'schedule/store-period'             => ['ScheduleController', 'storePeriod',      ['ADMIN']],
-        'schedule/open-registration'        => ['ScheduleController', 'openRegistration', ['ADMIN']],
-        'schedule/publish'                  => ['ScheduleController', 'publish',          ['ADMIN']],
-        'schedule/register-slot'            => ['ScheduleController', 'registerSlot',     null],
-        'schedule/assign'                   => ['ScheduleController', 'assign',           ['ADMIN']],
-        'schedule/remove-assignment'        => ['ScheduleController', 'removeAssignment', ['ADMIN']],
-
         // Leave
         'leave'             => ['LeaveController', 'index',   null],
         'leave/create'      => ['LeaveController', 'create',  null],
@@ -53,21 +43,6 @@ class Router {
         // Attendance
         'attendance'            => ['AttendanceController', 'index',   null],
         'attendance/update'     => ['AttendanceController', 'update',  ['ADMIN']],
-
-        // Payroll
-        'payroll'                   => ['PayrollController', 'index',       null],
-        'payroll/create-period'     => ['PayrollController', 'createPeriod', ['ADMIN']],
-        'payroll/store-period'      => ['PayrollController', 'storePeriod',  ['ADMIN']],
-        'payroll/calculate'         => ['PayrollController', 'calculate',    ['ADMIN']],
-        'payroll/publish'           => ['PayrollController', 'publish',      ['ADMIN']],
-        'payroll/view'              => ['PayrollController', 'view',         null],
-
-        // Tickets
-        'tickets'           => ['TicketController', 'index',   null],
-        'tickets/create'    => ['TicketController', 'create',  null],
-        'tickets/store'     => ['TicketController', 'store',   null],
-        'tickets/view'      => ['TicketController', 'view',    null],
-        'tickets/update-status' => ['TicketController', 'updateStatus', ['ADMIN']],
 
         // AJAX Endpoints (return JSON)
         'ajax/employees/search'        => ['AjaxController',       'employeeSearch',       ['ADMIN']],

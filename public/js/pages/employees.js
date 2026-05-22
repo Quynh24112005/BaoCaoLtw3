@@ -1,31 +1,29 @@
-$(function() {
-    // =========================================================
-    // 1. AJAX LIVE SEARCH — gõ là ra kết quả ngay
-    // =========================================================
+$(function () {
+    // 1. AJAX LIVE SEARCH
     let searchTimer;
-    $('#liveSearch').on('input', function() {
+    $('#liveSearch').on('input', function () {
         clearTimeout(searchTimer);
-        const q      = $(this).val().trim();
-        const dept   = $('select[name="department"]').val();
-        const role   = $('select[name="role"]').val();
+        const q = $(this).val().trim();
+        const dept = $('select[name="department"]').val();
+        const role = $('select[name="role"]').val();
         const status = $('select[name="status"]').val();
 
-        searchTimer = setTimeout(function() {
+        searchTimer = setTimeout(function () {
             $.ajax({
                 url: BASE + '/ajax/employees/search',
                 method: 'GET',
                 data: { q, department: dept, role, status },
-                success: function(res) {
+                success: function (res) {
                     if (!res.success) return;
                     renderEmployeeRows(res.data);
                     lucide.createIcons();
                 }
             });
-        }, 300); // debounce 300ms
+        }, 300);
     });
 
     // Re-search khi thay đổi dropdown bộ lọc
-    $('select[name="department"], select[name="role"], select[name="status"]').off('change').on('change', function() {
+    $('select[name="department"], select[name="role"], select[name="status"]').off('change').on('change', function () {
         $('#liveSearch').trigger('input');
     });
 
@@ -36,10 +34,10 @@ $(function() {
             return;
         }
         let html = '';
-        employees.forEach(function(emp) {
-            const isActive  = emp.status === 'ACTIVE';
-            const dotClass  = isActive ? 'active' : 'inactive';
-            const lockIcon  = isActive ? 'lock' : 'unlock';
+        employees.forEach(function (emp) {
+            const isActive = emp.status === 'ACTIVE';
+            const dotClass = isActive ? 'active' : 'inactive';
+            const lockIcon = isActive ? 'lock' : 'unlock';
             const lockTitle = isActive ? 'Khóa tài khoản' : 'Mở khóa';
             const roleBadge = emp.role === 'ADMIN' ? 'admin' : 'employee';
             html += `
@@ -84,18 +82,16 @@ $(function() {
         tbody.html(html);
     }
 
-    // =========================================================
-    // 2. AJAX TOGGLE STATUS (Khóa / Mở khóa) — có Modal Xác nhận tùy chỉnh
-    // =========================================================
+    // 2. AJAX TOGGLE STATUS (Khóa / Mở khóa)
     let statusBtnToSubmit = null;
     let statusIdToSubmit = null;
     let statusTargetToSubmit = null;
 
-    $(document).on('click', '.btn-ajax-toggle', function() {
-        const btn           = $(this);
-        const id            = btn.data('id');
+    $(document).on('click', '.btn-ajax-toggle', function () {
+        const btn = $(this);
+        const id = btn.data('id');
         const currentStatus = btn.data('status');
-        const isLocking     = currentStatus === 'ACTIVE';
+        const isLocking = currentStatus === 'ACTIVE';
 
         statusBtnToSubmit = btn;
         statusIdToSubmit = id;
@@ -135,7 +131,7 @@ $(function() {
     });
 
     // Bấm nút Hủy trên modal thay đổi trạng thái
-    $('#btnCancelStatus').on('click', function() {
+    $('#btnCancelStatus').on('click', function () {
         $('#statusConfirmModal').fadeOut(150);
         statusBtnToSubmit = null;
         statusIdToSubmit = null;
@@ -143,7 +139,7 @@ $(function() {
     });
 
     // Bấm nút Xác nhận trên modal thay đổi trạng thái
-    $('#btnConfirmStatus').on('click', function() {
+    $('#btnConfirmStatus').on('click', function () {
         if (!statusBtnToSubmit || !statusIdToSubmit) return;
 
         const btn = statusBtnToSubmit;
@@ -157,14 +153,14 @@ $(function() {
             url: BASE + '/ajax/employees/toggle-status',
             method: 'POST',
             data: { id },
-            success: function(res) {
+            success: function (res) {
                 if (!res.success) {
                     alert(res.message);
                     btn.prop('disabled', false);
                     return;
                 }
                 const isNowActive = res.new_status === 'ACTIVE';
-                const newDot  = isNowActive ? 'active' : 'inactive';
+                const newDot = isNowActive ? 'active' : 'inactive';
                 const newIcon = isNowActive ? 'lock' : 'unlock';
                 const newTitle = isNowActive ? 'Khóa tài khoản' : 'Mở khóa tài khoản';
 
@@ -175,9 +171,9 @@ $(function() {
                 btn.find('i').attr('data-lucide', newIcon);
                 btn.prop('disabled', false);
                 lucide.createIcons();
-                showToast(isNowActive ? '✓ Đã mở khóa tài khoản.' : '🔒 Đã khóa tài khoản.', isNowActive ? 'success' : 'warning');
+                showToast(isNowActive ? 'Đã mở khóa tài khoản.' : 'Đã khóa tài khoản.', isNowActive ? 'success' : 'warning');
             },
-            error: function() {
+            error: function () {
                 alert('Lỗi kết nối. Vui lòng thử lại.');
                 btn.prop('disabled', false);
             }
@@ -190,20 +186,20 @@ $(function() {
     let formToSubmit = null;
 
     // Lắng nghe sự kiện submit của form xóa
-    $(document).on('submit', '.delete-employee-form', function(e) {
+    $(document).on('submit', '.delete-employee-form', function (e) {
         e.preventDefault();
         formToSubmit = this;
         $('#deleteConfirmModal').css('display', 'flex').hide().fadeIn(200);
     });
 
     // Bấm nút Hủy trên modal xóa
-    $('#btnCancelDelete').on('click', function() {
+    $('#btnCancelDelete').on('click', function () {
         $('#deleteConfirmModal').fadeOut(150);
         formToSubmit = null;
     });
 
     // Bấm vùng tối overlay để tắt modal xóa/khóa
-    $('.modal-overlay').on('click', function() {
+    $('.modal-overlay').on('click', function () {
         $('#deleteConfirmModal').fadeOut(150);
         $('#statusConfirmModal').fadeOut(150);
         formToSubmit = null;
@@ -213,7 +209,7 @@ $(function() {
     });
 
     // Bấm nút Xác nhận xóa trên modal
-    $('#btnConfirmDelete').on('click', function() {
+    $('#btnConfirmDelete').on('click', function () {
         if (formToSubmit) {
             formToSubmit.submit();
         }
@@ -226,8 +222,8 @@ function escHtml(str) {
 
 function showToast(msg, type) {
     const colors = { success: 'var(--success)', warning: 'var(--warning)', danger: 'var(--danger)' };
-    const color  = colors[type] || colors.success;
-    const toast  = $(`<div style="position:fixed;top:20px;right:24px;z-index:9999;background:#fff;border-left:4px solid ${color};padding:12px 20px;border-radius:10px;box-shadow:0 8px 24px rgba(0,0,0,0.12);font-weight:600;font-size:0.9rem;min-width:240px;">${msg}</div>`);
+    const color = colors[type] || colors.success;
+    const toast = $(`<div style="position:fixed;top:20px;right:24px;z-index:9999;background:#fff;border-left:4px solid ${color};padding:12px 20px;border-radius:10px;box-shadow:0 8px 24px rgba(0,0,0,0.12);font-weight:600;font-size:0.9rem;min-width:240px;">${msg}</div>`);
     $('body').append(toast);
     setTimeout(() => toast.fadeOut(400, () => toast.remove()), 3000);
 }

@@ -42,10 +42,6 @@
 
         <div class="nav-section">
             <span class="nav-label">Nghiệp vụ</span>
-            <a href="<?= BASE_URL ?>/schedule" class="nav-item <?= strpos($_SERVER['REQUEST_URI'], '/schedule') !== false ? 'active' : '' ?>">
-                <i data-lucide="calendar" class="nav-icon"></i>
-                <span>Lịch làm việc</span>
-            </a>
             <a href="<?= BASE_URL ?>/leave" class="nav-item <?= strpos($_SERVER['REQUEST_URI'], '/leave') !== false ? 'active' : '' ?>">
                 <i data-lucide="palmtree" class="nav-icon"></i>
                 <span>Nghỉ phép</span>
@@ -53,14 +49,6 @@
             <a href="<?= BASE_URL ?>/attendance" class="nav-item <?= strpos($_SERVER['REQUEST_URI'], '/attendance') !== false ? 'active' : '' ?>">
                 <i data-lucide="clock" class="nav-icon"></i>
                 <span>Chấm công</span>
-            </a>
-            <a href="<?= BASE_URL ?>/payroll" class="nav-item <?= strpos($_SERVER['REQUEST_URI'], '/payroll') !== false ? 'active' : '' ?>">
-                <i data-lucide="credit-card" class="nav-icon"></i>
-                <span>Bảng lương</span>
-            </a>
-            <a href="<?= BASE_URL ?>/tickets" class="nav-item <?= strpos($_SERVER['REQUEST_URI'], '/tickets') !== false ? 'active' : '' ?>">
-                <i data-lucide="message-square" class="nav-icon"></i>
-                <span>Khiếu nại & Hỗ trợ</span>
             </a>
         </div>
 
